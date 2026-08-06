@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+:root {
+  --bg-peach: #fff8f6;
+  --bg-peach-deep: #fbeae5;
+  --coral: #ff6b52;
+  --coral-soft: #ff6b6b;
+  --coral-muted: #ffece6;
+  --purple: #5c4d9a;
+  --indigo: #5c4d9a;
+  --indigo-deep: #4a3d82;
+  --ink: #2d2a2a;
+  --muted: #8a807e;
+  --success: #78c193;
+  --border: #d1cfce;
+  --surface: #ffffff;
+  --tip: #e6e0ff;
+  --yellow: #ffc72c;
+  --cream: #fff9db;
+  --privacy: #eef8f2;
+  --background: var(--bg-peach);
+  --foreground: var(--ink);
+  --screen-gradient: linear-gradient(
+    245deg,
+    #fff8f6 25%,
+    #fbeae5 75%
+  );
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-outfit), ui-rounded, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: linear-gradient(165deg, #1a1428 0%, #2a2348 100%);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.screen-bg {
+  background-image: var(--screen-gradient);
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-float {
+  animation: float 3.2s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.45s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out both;
+}
+
+.animate-screen-in {
+  animation: screen-in 0.28s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-slide-up,
+  .animate-fade-in,
+  .animate-screen-in {
+    animation: none;
+  }
+}
