@@ -56,13 +56,13 @@ export function ScreenShell({
       */}
       <div className="flex min-h-full flex-col">
         {typeof step === "number" ? (
-          <div className="safe-top w-full shrink-0 px-6 pt-2">
+          <div className="safe-top w-full shrink-0 px-6 pt-2 pb-1">
             <ProgressBar step={step} />
           </div>
         ) : null}
 
         {title ? (
-          <h1 className="shrink-0 px-6 pb-2 pt-4 text-left text-3xl font-extrabold leading-9 tracking-tight text-[var(--ink)]">
+          <h1 className="shrink-0 px-6 pb-2 pt-7 text-left text-3xl font-extrabold leading-9 tracking-tight text-[var(--ink)]">
             {title}
           </h1>
         ) : null}

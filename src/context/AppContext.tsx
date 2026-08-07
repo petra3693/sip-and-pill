@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  buildMedReminders,
   clampWaterMl,
   createId,
   DEFAULT_PREFERENCES,
@@ -58,6 +59,8 @@ interface AppContextValue {
   setSoundEnabled: (enabled: boolean) => void;
   toggleReminderTime: (id: string) => void;
   updateReminderTime: (id: string, time: string) => void;
+  /** Align medication reminder rows with the dose slots chosen on Meds screen. */
+  syncMedReminders: (timesPerDay: number) => void;
   updateNotifications: (partial: Partial<NotificationSettings>) => void;
   markCelebrationShown: (kind: keyof Omit<CelebrationFlags, "date">) => void;
   logGlass: (delta: number) => void;
@@ -410,6 +413,23 @@ export function AppProvider({
     [updatePrefs]
   );
 
+  const syncMedReminders = useCallback(
+    (timesPerDay: number) => {
+      updatePrefs((prev) => {
+        const times = buildMedReminders(timesPerDay, prev.reminders.times);
+        return {
+          ...prev,
+          reminders: {
+            ...prev.reminders,
+            times,
+          },
+          notifications: notificationsFromSetup(prev.trackingMode, times),
+        };
+      });
+    },
+    [updatePrefs]
+  );
+
   const updateNotifications = useCallback(
     (partial: Partial<NotificationSettings>) => {
       updatePrefs((prev) => ({
@@ -497,6 +517,7 @@ export function AppProvider({
       setSoundEnabled,
       toggleReminderTime,
       updateReminderTime,
+      syncMedReminders,
       updateNotifications,
       markCelebrationShown,
       logGlass,
@@ -521,6 +542,7 @@ export function AppProvider({
       setSoundEnabled,
       toggleReminderTime,
       updateReminderTime,
+      syncMedReminders,
       updateNotifications,
       markCelebrationShown,
       logGlass,

@@ -35,7 +35,7 @@ export function BottomNav({ flush = false }: BottomNavProps) {
       ].join(" ")}
     >
       <div className={flush ? "" : "overflow-hidden rounded-t-[16px]"}>
-        <div className="flex h-[52px] items-stretch">
+        <div className="flex h-12 items-stretch">
           {ITEMS.map((item) => {
             const active = screen === item.screen;
             return (
@@ -55,7 +55,7 @@ export function BottomNav({ flush = false }: BottomNavProps) {
               >
                 <span
                   aria-hidden="true"
-                  className="inline-block size-[18px] shrink-0 bg-current"
+                  className="inline-block size-4 shrink-0 bg-current"
                   style={{
                     maskImage: `url(${item.icon})`,
                     WebkitMaskImage: `url(${item.icon})`,

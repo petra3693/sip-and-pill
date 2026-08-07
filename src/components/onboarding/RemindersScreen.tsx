@@ -29,8 +29,11 @@ const REMINDER_ICONS: Record<string, string> = {
 
 const REMINDER_LABEL_KEYS: Record<string, TranslationKey> = {
   Morning: "morning",
+  "Mid-morning": "midmorning",
   Noon: "noon",
+  Afternoon: "afternoon",
   Evening: "evening",
+  Night: "night",
   Custom: "custom",
 };
 
@@ -46,7 +49,9 @@ export function RemindersScreen() {
   const t = useT();
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const editing = prefs.reminders.times.find((item) => item.id === editingId);
+  const showMedReminders = prefs.trackingMode !== "water";
+  const medReminderTimes = showMedReminders ? prefs.reminders.times : [];
+  const editing = medReminderTimes.find((item) => item.id === editingId);
 
   return (
     <ScreenShell
@@ -94,50 +99,52 @@ export function RemindersScreen() {
           </div>
         </div>
 
-        <div className="rounded-[24px] border border-[var(--border)] bg-white p-3.5 shadow-[0_8px_16px_rgba(92,77,154,0.08)]">
-          <p className="mb-2.5 text-[14px] font-extrabold text-[var(--purple)]">
-            {t("medicationReminders")}
-          </p>
-          <div className="flex flex-col gap-2">
-            {prefs.reminders.times.map((item) => (
-              <div
-                key={item.id}
-                className="flex min-h-10 items-center gap-3 py-1"
-              >
-                <Icon
-                  name={REMINDER_ICONS[item.icon ?? "custom"]}
-                  size={32}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[12px] font-normal text-[var(--muted)]">
-                    {REMINDER_LABEL_KEYS[item.label]
-                      ? t(REMINDER_LABEL_KEYS[item.label])
-                      : item.label}
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <p className="text-[14px] font-extrabold text-[var(--ink)]">
-                      {item.time}
+        {showMedReminders && medReminderTimes.length > 0 ? (
+          <div className="rounded-[24px] border border-[var(--border)] bg-white p-3.5 shadow-[0_8px_16px_rgba(92,77,154,0.08)]">
+            <p className="mb-2.5 text-[14px] font-extrabold text-[var(--purple)]">
+              {t("medicationReminders")}
+            </p>
+            <div className="flex flex-col gap-2">
+              {medReminderTimes.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex min-h-10 items-center gap-3 py-1"
+                >
+                  <Icon
+                    name={REMINDER_ICONS[item.icon ?? "custom"]}
+                    size={32}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[12px] font-normal text-[var(--muted)]">
+                      {REMINDER_LABEL_KEYS[item.label]
+                        ? t(REMINDER_LABEL_KEYS[item.label])
+                        : item.label}
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => setEditingId(item.id)}
-                      className="flex items-center gap-1 text-[12px] font-extrabold text-[var(--purple)]"
-                      aria-label={t("editTime")}
-                    >
-                      {t("edit")}
-                      <Icon name="edit" size={10} />
-                    </button>
+                    <div className="flex items-center gap-4">
+                      <p className="text-[14px] font-extrabold text-[var(--ink)]">
+                        {item.time}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(item.id)}
+                        className="flex items-center gap-1 text-[12px] font-extrabold text-[var(--purple)]"
+                        aria-label={t("editTime")}
+                      >
+                        {t("edit")}
+                        <Icon name="edit" size={10} />
+                      </button>
+                    </div>
                   </div>
+                  <ToggleSwitch
+                    checked={item.enabled}
+                    onChange={() => toggleReminderTime(item.id)}
+                    ariaLabel={`${t("editTime")} ${item.time}`}
+                  />
                 </div>
-                <ToggleSwitch
-                  checked={item.enabled}
-                  onChange={() => toggleReminderTime(item.id)}
-                  ariaLabel={`${t("editTime")} ${item.time}`}
-                />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       <TimePickerModal

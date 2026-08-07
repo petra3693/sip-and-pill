@@ -42,40 +42,52 @@ export const MED_TIME_SLOTS: MedTimeSlot[] = [
   "night",
 ];
 
+/** Default clock + label for each medication dose slot. */
+export const MED_SLOT_REMINDER_DEFAULTS: Record<
+  MedTimeSlot,
+  { label: string; time: string; icon: NonNullable<ReminderTime["icon"]> }
+> = {
+  morning: { label: "Morning", time: "8:00 AM", icon: "morning" },
+  midmorning: { label: "Mid-morning", time: "10:00 AM", icon: "morning" },
+  noon: { label: "Noon", time: "12:30 PM", icon: "noon" },
+  afternoon: { label: "Afternoon", time: "3:00 PM", icon: "noon" },
+  evening: { label: "Evening", time: "8:00 PM", icon: "evening" },
+  night: { label: "Night", time: "10:00 PM", icon: "evening" },
+};
+
+/**
+ * Build medication reminder rows for the first `timesPerDay` slots.
+ * Preserves prior time/enabled when the same slot id already exists.
+ */
+export function buildMedReminders(
+  timesPerDay: number,
+  previous: ReminderTime[] = [],
+): ReminderTime[] {
+  const count = Math.min(
+    MAX_MED_TIMES_PER_DAY,
+    Math.max(1, Math.round(timesPerDay)),
+  );
+  return MED_TIME_SLOTS.slice(0, count).map((slot) => {
+    const defaults = MED_SLOT_REMINDER_DEFAULTS[slot];
+    const id = `rem-${slot}`;
+    const prev =
+      previous.find((item) => item.id === id) ??
+      previous.find((item) => item.label === defaults.label);
+    return {
+      id,
+      label: defaults.label,
+      time: prev?.time ?? defaults.time,
+      enabled: prev?.enabled ?? true,
+      icon: defaults.icon,
+    };
+  });
+}
+
 export const DEFAULT_REMINDERS: ReminderSchedule = {
   frequency: "3x-daily",
   soundEnabled: true,
   vibrationEnabled: true,
-  times: [
-    {
-      id: "rem-1",
-      label: "Morning",
-      time: "8:00 AM",
-      enabled: true,
-      icon: "morning",
-    },
-    {
-      id: "rem-2",
-      label: "Noon",
-      time: "12:30 PM",
-      enabled: true,
-      icon: "noon",
-    },
-    {
-      id: "rem-3",
-      label: "Evening",
-      time: "8:00 PM",
-      enabled: true,
-      icon: "evening",
-    },
-    {
-      id: "rem-4",
-      label: "Custom",
-      time: "11:00 AM",
-      enabled: false,
-      icon: "custom",
-    },
-  ],
+  times: buildMedReminders(3),
 };
 
 export const DEFAULT_PREFERENCES: UserPreferences = {

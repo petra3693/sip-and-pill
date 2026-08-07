@@ -36,6 +36,7 @@ export function MedicationsScreen() {
     addMedication,
     updateMedication,
     removeMedication,
+    syncMedReminders,
     goToNextOnboarding,
   } = useApp();
   const t = useT();
@@ -52,12 +53,17 @@ export function MedicationsScreen() {
     [timesPerDay]
   );
 
+  const handleContinue = () => {
+    syncMedReminders(timesPerDay);
+    goToNextOnboarding();
+  };
+
   return (
     <ScreenShell
       step={ONBOARDING_PROGRESS.medications}
       title={t("setMedications")}
       footer={
-        <Button onClick={goToNextOnboarding}>{t("confirmGoal")}</Button>
+        <Button onClick={handleContinue}>{t("confirmGoal")}</Button>
       }
     >
       <div className="rounded-[24px] bg-[var(--purple)] p-6 text-center text-white shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
