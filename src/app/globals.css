@@ -20,11 +20,14 @@
   --privacy: #eef8f2;
   --background: var(--bg-peach);
   --foreground: var(--ink);
+  --app-chrome: #fff8f6;
   --screen-gradient: linear-gradient(
     245deg,
     #fff8f6 25%,
     #fbeae5 75%
   );
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @theme inline {
@@ -37,15 +40,33 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+html {
   margin: 0;
   padding: 0;
+  width: 100%;
   min-height: 100%;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  /* Must stay scrollable for iOS Safari 26 Liquid Glass chrome sampling */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  background-color: var(--app-chrome, #fff8f6);
+  background: var(--app-chrome, #fff8f6);
 }
 
 body {
-  background: linear-gradient(165deg, #1a1428 0%, #2a2348 100%);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  background-color: var(--app-chrome, #fff8f6);
+  background: var(--app-chrome, #fff8f6);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -67,7 +88,31 @@ input {
 }
 
 .screen-bg {
+  background-color: var(--bg-peach);
   background-image: var(--screen-gradient);
+}
+
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+}
+
+/*
+ * Content inset under a translucent status bar.
+ * Peach page backgrounds extend edge-to-edge; this only pads readable text.
+ */
+.safe-top {
+  padding-top: max(3rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+}
+
+/* Soft cutout for residual light/dark fringes on character PNGs. */
+.mascot-cutout {
+  background: transparent;
+  mix-blend-mode: multiply;
+}
+
+.mascot-cutout-on-dark {
+  background: transparent;
+  mix-blend-mode: screen;
 }
 
 @keyframes float {
@@ -77,6 +122,19 @@ input {
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@keyframes flex-pose {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-4px) scale(1.06);
+  }
+  60% {
+    transform: translateY(-2px) scale(1.02);
   }
 }
 
@@ -111,8 +169,44 @@ input {
   }
 }
 
+@keyframes celebrate-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Returning-user boot splash: gentle lift, then fade out. */
+@keyframes splash-boot {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  72% {
+    opacity: 1;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+}
+
 .animate-float {
-  animation: float 3.2s ease-in-out infinite;
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-flex {
+  animation: flex-pose 2.2s ease-in-out infinite;
+  transform-origin: center bottom;
 }
 
 .animate-slide-up {
@@ -127,11 +221,22 @@ input {
   animation: screen-in 0.28s ease-out both;
 }
 
+.animate-celebrate {
+  animation: celebrate-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-splash-boot {
+  animation: splash-boot 2.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
+  .animate-flex,
   .animate-slide-up,
   .animate-fade-in,
-  .animate-screen-in {
+  .animate-screen-in,
+  .animate-celebrate,
+  .animate-splash-boot {
     animation: none;
   }
 }

@@ -1,19 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Icon, MascotImage } from "@/components/ui/Icon";
+import { Icon } from "@/components/ui/Icon";
 import { ScreenShell } from "@/components/ui/ScreenShell";
+import { TimePickerModal } from "@/components/ui/TimePickerModal";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { useApp } from "@/context/AppContext";
+import { useT } from "@/hooks/useT";
+import type { TranslationKey } from "@/lib/i18n";
 import { ONBOARDING_PROGRESS } from "@/lib/screens";
 import type { ReminderFrequency } from "@/types";
 
-const FREQUENCIES: { value: ReminderFrequency; label: string }[] = [
-  { value: "every-glass", label: "Every glass" },
-  { value: "3x-daily", label: "3x daily" },
-  { value: "2x-daily", label: "2x daily" },
-  { value: "hourly", label: "Hourly" },
-  { value: "custom", label: "Custom" },
+const FREQUENCIES: { value: ReminderFrequency; labelKey: TranslationKey }[] = [
+  { value: "every-glass", labelKey: "everyGlass" },
+  { value: "3x-daily", labelKey: "threeDaily" },
+  { value: "2x-daily", labelKey: "twoDaily" },
+  { value: "hourly", labelKey: "hourly" },
+  { value: "custom", labelKey: "custom" },
 ];
 
 const REMINDER_ICONS: Record<string, string> = {
@@ -23,34 +27,40 @@ const REMINDER_ICONS: Record<string, string> = {
   custom: "icon-custom",
 };
 
+const REMINDER_LABEL_KEYS: Record<string, TranslationKey> = {
+  Morning: "morning",
+  Noon: "noon",
+  Evening: "evening",
+  Custom: "custom",
+};
+
 export function RemindersScreen() {
   const {
     prefs,
     setReminderFrequency,
     setSoundEnabled,
     toggleReminderTime,
+    updateReminderTime,
     completeOnboarding,
   } = useApp();
+  const t = useT();
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const editing = prefs.reminders.times.find((item) => item.id === editingId);
 
   return (
     <ScreenShell
       step={ONBOARDING_PROGRESS.reminders}
-      title="Daily Reminders"
-      footer={<Button onClick={completeOnboarding}>Finish Setup</Button>}
+      title={t("dailyReminders")}
+      footer={
+        <Button onClick={completeOnboarding}>{t("finishSetup")}</Button>
+      }
+      className="relative"
     >
-      <div className="flex justify-center pb-1 animate-float">
-        <MascotImage
-          src="/mascots/both-reading.png"
-          width={218}
-          height={117}
-          alt="Mascots reading together"
-        />
-      </div>
-
-      <div className="mt-3 flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         <div className="rounded-[24px] border border-[var(--border)] bg-white p-3.5 shadow-[0_8px_16px_rgba(92,77,154,0.08)]">
           <p className="mb-5 text-[14px] font-extrabold text-[var(--purple)]">
-            How often should I remind you?
+            {t("howOftenRemind")}
           </p>
           <div className="mb-5 flex gap-1">
             {FREQUENCIES.map((item) => {
@@ -67,26 +77,26 @@ export function RemindersScreen() {
                       : "bg-[#fff8f6] text-[var(--ink)]",
                   ].join(" ")}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                 </button>
               );
             })}
           </div>
           <div className="flex min-h-7 items-center justify-between gap-3">
             <p className="text-[13px] font-bold leading-none text-[var(--ink)]">
-              Sound notification
+              {t("soundNotification")}
             </p>
             <ToggleSwitch
               checked={prefs.reminders.soundEnabled}
               onChange={setSoundEnabled}
-              ariaLabel="Toggle sound notification"
+              ariaLabel={t("soundNotification")}
             />
           </div>
         </div>
 
         <div className="rounded-[24px] border border-[var(--border)] bg-white p-3.5 shadow-[0_8px_16px_rgba(92,77,154,0.08)]">
           <p className="mb-2.5 text-[14px] font-extrabold text-[var(--purple)]">
-            Medication Reminders
+            {t("medicationReminders")}
           </p>
           <div className="flex flex-col gap-2">
             {prefs.reminders.times.map((item) => (
@@ -100,28 +110,44 @@ export function RemindersScreen() {
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] font-normal text-[var(--muted)]">
-                    {item.label}
+                    {REMINDER_LABEL_KEYS[item.label]
+                      ? t(REMINDER_LABEL_KEYS[item.label])
+                      : item.label}
                   </p>
                   <div className="flex items-center gap-4">
                     <p className="text-[14px] font-extrabold text-[var(--ink)]">
                       {item.time}
                     </p>
-                    <span className="flex items-center gap-1 text-[12px] font-extrabold text-[var(--purple)]">
-                      Edit
+                    <button
+                      type="button"
+                      onClick={() => setEditingId(item.id)}
+                      className="flex items-center gap-1 text-[12px] font-extrabold text-[var(--purple)]"
+                      aria-label={t("editTime")}
+                    >
+                      {t("edit")}
                       <Icon name="edit" size={10} />
-                    </span>
+                    </button>
                   </div>
                 </div>
                 <ToggleSwitch
                   checked={item.enabled}
                   onChange={() => toggleReminderTime(item.id)}
-                  ariaLabel={`Toggle reminder at ${item.time}`}
+                  ariaLabel={`${t("editTime")} ${item.time}`}
                 />
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      <TimePickerModal
+        open={Boolean(editing)}
+        initialTime={editing?.time ?? "8:00 AM"}
+        onClose={() => setEditingId(null)}
+        onSave={(time) => {
+          if (editingId) updateReminderTime(editingId, time);
+        }}
+      />
     </ScreenShell>
   );
 }

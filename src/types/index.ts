@@ -7,12 +7,25 @@ export type LanguageCode =
   | "it"
   | "pt"
   | "ja"
-  | "ko"
-  | "ru";
+  | "ko";
 
 export type TrackingMode = "water" | "meds" | "both";
 
-export type MedTimeSlot = "morning" | "noon" | "evening" | "night";
+export type MedTimeSlot =
+  | "morning"
+  | "midmorning"
+  | "noon"
+  | "afternoon"
+  | "evening"
+  | "night";
+
+export interface CelebrationFlags {
+  /** Local date key (YYYY-MM-DD) when celebrations were last cleared. */
+  date: string;
+  water: boolean;
+  meds: boolean;
+  both: boolean;
+}
 
 export type ReminderFrequency =
   | "every-glass"
@@ -70,7 +83,9 @@ export interface UserPreferences {
   medications: Medication[];
   reminders: ReminderSchedule;
   notifications: NotificationSettings;
+  /** Local calendar date (YYYY-MM-DD) of the current daily log period. */
   lastLogDate: string;
+  celebrations: CelebrationFlags;
 }
 
 export type OnboardingStep =

@@ -10,19 +10,24 @@ import {
   type ReactNode,
 } from "react";
 import {
+  clampWaterMl,
   createId,
   DEFAULT_PREFERENCES,
   DEFAULT_REMINDERS,
+  notificationsFromSetup,
   todayKey,
 } from "@/lib/constants";
+import { translate } from "@/lib/i18n";
 import { ONBOARDING_FLOW } from "@/lib/screens";
 import {
   clearPreferences,
   loadPreferences,
+  resetDailyProgress,
   savePreferences,
 } from "@/lib/storage";
 import type {
   AppScreen,
+  CelebrationFlags,
   LanguageCode,
   Medication,
   MedTimeSlot,
@@ -40,6 +45,7 @@ interface AppContextValue {
   hydrated: boolean;
   setScreen: (screen: AppScreen) => void;
   goToNextOnboarding: () => void;
+  goToPreviousOnboarding: () => void;
   setLanguage: (language: LanguageCode) => void;
   setName: (name: string) => void;
   setTrackingMode: (mode: TrackingMode) => void;
@@ -51,7 +57,9 @@ interface AppContextValue {
   setReminderFrequency: (frequency: ReminderFrequency) => void;
   setSoundEnabled: (enabled: boolean) => void;
   toggleReminderTime: (id: string) => void;
+  updateReminderTime: (id: string, time: string) => void;
   updateNotifications: (partial: Partial<NotificationSettings>) => void;
+  markCelebrationShown: (kind: keyof Omit<CelebrationFlags, "date">) => void;
   logGlass: (delta: number) => void;
   completeOnboarding: () => void;
   resetAllData: () => void;
@@ -98,6 +106,13 @@ export const DEMO_PREFERENCES: UserPreferences = {
     waterReminders: true,
     pillAlarms: false,
   },
+  lastLogDate: todayKey(),
+  celebrations: {
+    date: todayKey(),
+    water: false,
+    meds: false,
+    both: false,
+  },
 };
 
 function nextOnboardingStep(
@@ -121,6 +136,29 @@ function nextOnboardingStep(
   }
 
   return "home";
+}
+
+function previousOnboardingStep(
+  current: OnboardingStep,
+  trackingMode: TrackingMode
+): OnboardingStep | null {
+  const index = ONBOARDING_FLOW.indexOf(current);
+  let prevIndex = index - 1;
+
+  while (prevIndex >= 0) {
+    const step = ONBOARDING_FLOW[prevIndex];
+    if (step === "water-goal" && trackingMode === "meds") {
+      prevIndex -= 1;
+      continue;
+    }
+    if (step === "medications" && trackingMode === "water") {
+      prevIndex -= 1;
+      continue;
+    }
+    return step;
+  }
+
+  return null;
 }
 
 interface AppProviderProps {
@@ -151,7 +189,8 @@ export function AppProvider({
     }
     const loaded = loadPreferences();
     setPrefs(loaded);
-    setScreen(loaded.onboardingComplete ? "home" : "splash");
+    // Always open on splash; Get Started routes to home if already set up.
+    setScreen("splash");
     setHydrated(true);
   }, [demo, persist]);
 
@@ -162,6 +201,22 @@ export function AppProvider({
     savePreferences(prefs);
   }, [prefs, hydrated, persist, demo]);
 
+  // Midnight daily reset while the app stays open.
+  useEffect(() => {
+    if (!hydrated || demo) return;
+
+    const check = () => {
+      setPrefs((prev) => {
+        const next = resetDailyProgress(prev);
+        return next === prev ? prev : next;
+      });
+    };
+
+    check();
+    const id = window.setInterval(check, 30_000);
+    return () => window.clearInterval(id);
+  }, [hydrated, demo]);
+
   const updatePrefs = useCallback(
     (updater: (prev: UserPreferences) => UserPreferences) => {
       setPrefs((prev) => updater(prev));
@@ -170,6 +225,10 @@ export function AppProvider({
   );
 
   const goToNextOnboarding = useCallback(() => {
+    if (screen === "splash" && prefs.onboardingComplete) {
+      setScreen("home");
+      return;
+    }
     if (
       screen === "splash" ||
       screen === "language" ||
@@ -181,6 +240,20 @@ export function AppProvider({
     ) {
       const next = nextOnboardingStep(screen, prefs.trackingMode);
       setScreen(next);
+    }
+  }, [prefs.trackingMode, prefs.onboardingComplete, screen]);
+
+  const goToPreviousOnboarding = useCallback(() => {
+    if (
+      screen === "language" ||
+      screen === "name" ||
+      screen === "tracking" ||
+      screen === "water-goal" ||
+      screen === "medications" ||
+      screen === "reminders"
+    ) {
+      const prev = previousOnboardingStep(screen, prefs.trackingMode);
+      if (prev) setScreen(prev);
     }
   }, [prefs.trackingMode, screen]);
 
@@ -200,32 +273,45 @@ export function AppProvider({
 
   const setTrackingMode = useCallback(
     (trackingMode: TrackingMode) => {
-      updatePrefs((prev) => ({ ...prev, trackingMode }));
+      updatePrefs((prev) => ({
+        ...prev,
+        trackingMode,
+        notifications: notificationsFromSetup(
+          trackingMode,
+          prev.reminders.times,
+        ),
+      }));
     },
     [updatePrefs]
   );
 
   const updateWater = useCallback(
     (partial: Partial<WaterSettings>) => {
-      updatePrefs((prev) => ({
-        ...prev,
-        water: { ...prev.water, ...partial },
-        lastLogDate: todayKey(),
-      }));
+      updatePrefs((prev) => {
+        const nextWater = { ...prev.water, ...partial };
+        if (partial.dailyGoalMl != null) {
+          nextWater.dailyGoalMl = clampWaterMl(partial.dailyGoalMl);
+        }
+        return {
+          ...prev,
+          water: nextWater,
+          lastLogDate: todayKey(),
+        };
+      });
     },
     [updatePrefs]
   );
 
   const addMedication = useCallback(
-    (timeSlot: MedTimeSlot, name = "New medication") => {
+    (timeSlot: MedTimeSlot, name?: string) => {
       updatePrefs((prev) => ({
         ...prev,
         medications: [
           ...prev.medications,
           {
             id: createId("med"),
-            name,
-            dosage: "1 tablet",
+            name: name ?? translate(prev.language, "newMedication"),
+            dosage: translate(prev.language, "defaultDosage"),
             timeSlot,
             takenToday: false,
           },
@@ -309,11 +395,40 @@ export function AppProvider({
     [updatePrefs]
   );
 
+  const updateReminderTime = useCallback(
+    (id: string, time: string) => {
+      updatePrefs((prev) => ({
+        ...prev,
+        reminders: {
+          ...prev.reminders,
+          times: prev.reminders.times.map((item) =>
+            item.id === id ? { ...item, time } : item
+          ),
+        },
+      }));
+    },
+    [updatePrefs]
+  );
+
   const updateNotifications = useCallback(
     (partial: Partial<NotificationSettings>) => {
       updatePrefs((prev) => ({
         ...prev,
         notifications: { ...prev.notifications, ...partial },
+      }));
+    },
+    [updatePrefs]
+  );
+
+  const markCelebrationShown = useCallback(
+    (kind: keyof Omit<CelebrationFlags, "date">) => {
+      updatePrefs((prev) => ({
+        ...prev,
+        celebrations: {
+          ...prev.celebrations,
+          date: todayKey(),
+          [kind]: true,
+        },
       }));
     },
     [updatePrefs]
@@ -345,6 +460,11 @@ export function AppProvider({
       ...prev,
       onboardingComplete: true,
       lastLogDate: todayKey(),
+      // Lock Settings toggles to what was chosen in the first-setup reminders flow.
+      notifications: notificationsFromSetup(
+        prev.trackingMode,
+        prev.reminders.times,
+      ),
     }));
     setScreen("home");
   }, [updatePrefs]);
@@ -364,6 +484,7 @@ export function AppProvider({
       hydrated,
       setScreen,
       goToNextOnboarding,
+      goToPreviousOnboarding,
       setLanguage,
       setName,
       setTrackingMode,
@@ -375,7 +496,9 @@ export function AppProvider({
       setReminderFrequency,
       setSoundEnabled,
       toggleReminderTime,
+      updateReminderTime,
       updateNotifications,
+      markCelebrationShown,
       logGlass,
       completeOnboarding,
       resetAllData,
@@ -385,6 +508,7 @@ export function AppProvider({
       screen,
       hydrated,
       goToNextOnboarding,
+      goToPreviousOnboarding,
       setLanguage,
       setName,
       setTrackingMode,
@@ -396,7 +520,9 @@ export function AppProvider({
       setReminderFrequency,
       setSoundEnabled,
       toggleReminderTime,
+      updateReminderTime,
       updateNotifications,
+      markCelebrationShown,
       logGlass,
       completeOnboarding,
       resetAllData,

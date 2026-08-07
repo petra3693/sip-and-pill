@@ -1,10 +1,31 @@
-import { DEFAULT_PREFERENCES, STORAGE_KEY, todayKey } from "@/lib/constants";
-import type { UserPreferences } from "@/types";
+import { DEFAULT_PREFERENCES, LANGUAGES, STORAGE_KEY, todayKey } from "@/lib/constants";
+import type { LanguageCode, UserPreferences } from "@/types";
 
-function resetDailyProgress(prefs: UserPreferences): UserPreferences {
+const LANGUAGE_CODES = new Set(LANGUAGES.map((lang) => lang.code));
+
+function normalizeLanguage(code: unknown): LanguageCode {
+  if (typeof code === "string" && LANGUAGE_CODES.has(code as LanguageCode)) {
+    return code as LanguageCode;
+  }
+  return DEFAULT_PREFERENCES.language;
+}
+
+export function resetDailyProgress(prefs: UserPreferences): UserPreferences {
   const today = todayKey();
   if (prefs.lastLogDate === today) {
-    return prefs;
+    // Keep celebration flags in sync with the current day.
+    if (prefs.celebrations.date === today) {
+      return prefs;
+    }
+    return {
+      ...prefs,
+      celebrations: {
+        date: today,
+        water: false,
+        meds: false,
+        both: false,
+      },
+    };
   }
 
   return {
@@ -18,6 +39,12 @@ function resetDailyProgress(prefs: UserPreferences): UserPreferences {
       ...med,
       takenToday: false,
     })),
+    celebrations: {
+      date: today,
+      water: false,
+      meds: false,
+      both: false,
+    },
   };
 }
 
@@ -36,6 +63,7 @@ export function loadPreferences(): UserPreferences {
     const merged: UserPreferences = {
       ...DEFAULT_PREFERENCES,
       ...parsed,
+      language: normalizeLanguage(parsed.language),
       water: {
         ...DEFAULT_PREFERENCES.water,
         ...parsed.water,
@@ -51,6 +79,10 @@ export function loadPreferences(): UserPreferences {
         ...parsed.notifications,
       },
       medications: parsed.medications ?? DEFAULT_PREFERENCES.medications,
+      celebrations: {
+        ...DEFAULT_PREFERENCES.celebrations,
+        ...parsed.celebrations,
+      },
     };
 
     return resetDailyProgress(merged);

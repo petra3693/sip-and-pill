@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { HomeScreen } from "@/components/dashboard/HomeScreen";
 import { SettingsScreen } from "@/components/dashboard/SettingsScreen";
 import { LanguageScreen } from "@/components/onboarding/LanguageScreen";
@@ -40,24 +40,24 @@ export function renderScreen(screen: AppScreen): ReactNode {
   }
 }
 
-/** Single-screen mobile app shell used on `/`. */
+/** Single-screen mobile app shell — no global status-bar color ownership. */
 export function AppShell() {
   const { screen, hydrated, resetAllData } = useApp();
-  const isSplash = screen === "splash";
+
+  useEffect(() => {
+    const scroller = document.querySelectorAll(".scrollbar-hide");
+    scroller.forEach((node) => {
+      if (node instanceof HTMLElement) node.scrollTop = 0;
+    });
+  }, [screen]);
 
   if (!hydrated) {
-    return (
-      <PhoneFrame dark>
-        <div className="flex h-full items-center justify-center">
-          <div className="h-10 w-10 animate-pulse rounded-full bg-white/20" />
-        </div>
-      </PhoneFrame>
-    );
+    return null;
   }
 
   return (
-    <PhoneFrame dark={isSplash}>
-      <div key={screen} className="relative h-full animate-screen-in">
+    <PhoneFrame>
+      <div key={screen} className="relative h-full min-h-0 animate-screen-in">
         {renderScreen(screen)}
 
         {process.env.NODE_ENV === "development" ? (

@@ -1,11 +1,23 @@
 import type {
   LanguageOption,
-  Medication,
+  MedTimeSlot,
+  NotificationSettings,
   ReminderSchedule,
+  ReminderTime,
+  TrackingMode,
   UserPreferences,
 } from "@/types";
 
 export const STORAGE_KEY = "sip-and-pill-prefs-v2";
+
+/** Maximum daily water intake in milliliters. */
+export const MAX_WATER_ML = 10_000;
+
+/** Minimum daily water intake in milliliters. */
+export const MIN_WATER_ML = 250;
+
+/** Maximum medication dose times per day. */
+export const MAX_MED_TIMES_PER_DAY = 6;
 
 export const LANGUAGES: LanguageOption[] = [
   { code: "en", label: "English", flag: "🇬🇧" },
@@ -17,40 +29,17 @@ export const LANGUAGES: LanguageOption[] = [
   { code: "pt", label: "Português", flag: "🇵🇹" },
   { code: "ja", label: "日本語", flag: "🇯🇵" },
   { code: "ko", label: "한국어", flag: "🇰🇷" },
-  { code: "ru", label: "Русский", flag: "🇷🇺" },
 ];
 
 export const GLASS_SIZE_OPTIONS = [150, 200, 250, 330, 500] as const;
 
-export const DEFAULT_MEDICATIONS: Medication[] = [
-  {
-    id: "med-1",
-    name: "Blood pressure med",
-    dosage: "1 tablet",
-    timeSlot: "morning",
-    takenToday: false,
-  },
-  {
-    id: "med-2",
-    name: "Diabetes med",
-    dosage: "1 tablet",
-    timeSlot: "morning",
-    takenToday: false,
-  },
-  {
-    id: "med-3",
-    name: "Vitamin D",
-    dosage: "1 Capsule",
-    timeSlot: "noon",
-    takenToday: false,
-  },
-  {
-    id: "med-4",
-    name: "Cholesterol med",
-    dosage: "1 tablet",
-    timeSlot: "evening",
-    takenToday: false,
-  },
+export const MED_TIME_SLOTS: MedTimeSlot[] = [
+  "morning",
+  "midmorning",
+  "noon",
+  "afternoon",
+  "evening",
+  "night",
 ];
 
 export const DEFAULT_REMINDERS: ReminderSchedule = {
@@ -99,29 +88,52 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
     glassSizeMl: 250,
     glassesLoggedToday: 0,
   },
-  medications: DEFAULT_MEDICATIONS,
+  medications: [],
   reminders: DEFAULT_REMINDERS,
   notifications: {
     waterReminders: true,
-    pillAlarms: false,
+    // Matches DEFAULT_REMINDERS (morning / noon / evening enabled).
+    pillAlarms: true,
   },
   lastLogDate: "",
+  celebrations: {
+    date: "",
+    water: false,
+    meds: false,
+    both: false,
+  },
 };
 
-export const TIME_SLOT_LABELS: Record<
-  "morning" | "noon" | "evening" | "night",
-  string
-> = {
-  morning: "Morning",
-  noon: "Noon",
-  evening: "Evening",
-  night: "Night",
-};
+/**
+ * Settings notification toggles derived from onboarding choices:
+ * tracking mode + which medication reminder times were left on.
+ */
+export function notificationsFromSetup(
+  trackingMode: TrackingMode,
+  reminderTimes: ReminderTime[],
+): NotificationSettings {
+  const tracksWater = trackingMode !== "meds";
+  const tracksMeds = trackingMode !== "water";
+  const anyMedReminderOn = reminderTimes.some((time) => time.enabled);
 
-export function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
+  return {
+    waterReminders: tracksWater,
+    pillAlarms: tracksMeds && anyMedReminderOn,
+  };
+}
+
+/** Local calendar date key for daily reset boundaries (midnight). */
+export function todayKey(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 export function createId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+export function clampWaterMl(ml: number): number {
+  return Math.min(MAX_WATER_ML, Math.max(MIN_WATER_ML, Math.round(ml)));
 }

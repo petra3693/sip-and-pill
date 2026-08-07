@@ -1,20 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
 import { ScreenShell } from "@/components/ui/ScreenShell";
 import { useApp } from "@/context/AppContext";
+import { useT } from "@/hooks/useT";
 import { LANGUAGES } from "@/lib/constants";
 import { ONBOARDING_PROGRESS } from "@/lib/screens";
 import type { LanguageCode } from "@/types";
 
 export function LanguageScreen() {
   const { prefs, setLanguage, goToNextOnboarding } = useApp();
+  const t = useT();
 
   return (
     <ScreenShell
       step={ONBOARDING_PROGRESS.language}
-      title="Choose Language"
-      footer={<Button onClick={goToNextOnboarding}>Continue</Button>}
+      title={t("chooseLanguage")}
+      footer={<Button onClick={goToNextOnboarding}>{t("continue")}</Button>}
     >
       <div className="flex flex-col gap-2">
         {LANGUAGES.map((lang) => {
@@ -36,8 +39,8 @@ export function LanguageScreen() {
               </span>
               <span className="flex-1 text-base font-bold">{lang.label}</span>
               {selected ? (
-                <span className="flex size-5 items-center justify-center rounded-[10px] bg-[var(--coral-soft)]">
-                  <span className="block size-3 rounded-sm bg-white" />
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-[12px] bg-[var(--coral-soft)]">
+                  <Icon name="check" size={14} />
                 </span>
               ) : null}
             </button>
