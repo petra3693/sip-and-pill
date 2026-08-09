@@ -136,7 +136,7 @@ export function HomeGauge({
           onClick={() => onAdjust(-1)}
           disabled={logged <= 0}
           aria-label={t("removeGlass")}
-          className="absolute bottom-[2%] left-[-2%] z-10 flex size-11 items-center justify-center rounded-full bg-[var(--home-adjust)] text-[var(--home-adjust-ink)] transition active:scale-[0.96] disabled:bg-[var(--home-adjust-disabled)] disabled:text-[var(--muted)]"
+          className="absolute bottom-[0%] left-[-8%] z-10 flex size-11 items-center justify-center rounded-full bg-[var(--home-adjust)] text-[var(--home-adjust-ink)] transition active:scale-[0.96] disabled:bg-[var(--home-adjust-disabled)] disabled:text-[var(--muted)]"
         >
           <MaskIcon name="minus" size={20} />
         </button>
@@ -145,7 +145,7 @@ export function HomeGauge({
           onClick={() => onAdjust(1)}
           disabled={logged >= maxGlasses}
           aria-label={t("addGlass")}
-          className="absolute bottom-[2%] right-[-2%] z-10 flex size-11 items-center justify-center rounded-full bg-[var(--home-adjust)] text-[var(--home-adjust-ink)] transition active:scale-[0.96] disabled:bg-[var(--home-adjust-disabled)] disabled:text-[var(--muted)]"
+          className="absolute bottom-[0%] right-[-8%] z-10 flex size-11 items-center justify-center rounded-full bg-[var(--home-adjust)] text-[var(--home-adjust-ink)] transition active:scale-[0.96] disabled:bg-[var(--home-adjust-disabled)] disabled:text-[var(--muted)]"
         >
           <MaskIcon name="plus" size={20} />
         </button>
