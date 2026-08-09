@@ -89,14 +89,20 @@ export function HomeScreen() {
     logGlass(count - logged);
   };
 
+  const displayName = prefs.name.trim() || t("friend");
+  const nameToken = "__NAME__";
+  const [greetBefore, greetAfter = ""] = t("hiName", {
+    name: nameToken,
+  }).split(nameToken);
+
   return (
     <div className="screen-bg relative flex h-full min-h-0 flex-col overflow-hidden">
       <div className="relative z-10 safe-top min-h-0 flex-1 overflow-y-auto px-5 pb-16 scrollbar-hide">
         <header className="mb-2 flex items-center gap-3 pt-1">
-          <p className="min-w-0 flex-1 text-[17px] font-extrabold leading-snug text-[var(--ink)]">
-            {t("hiName", {
-              name: prefs.name.trim() || t("friend"),
-            })}
+          <p className="min-w-0 flex-1 text-[26px] font-extrabold leading-tight text-[var(--ink)]">
+            {greetBefore}
+            <span className="text-[var(--home-name)]">{displayName}</span>
+            {greetAfter}
           </p>
           <ThemeToggle />
         </header>

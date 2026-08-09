@@ -34,6 +34,7 @@
   --home-adjust: #ffd0c4;
   --home-adjust-disabled: #e5ddd9;
   --home-adjust-ink: var(--cta-ink);
+  --home-name: #5c4d9a;
   --home-outer-ring: rgba(92, 77, 154, 0.2);
   --background: var(--bg-peach);
   --foreground: var(--ink);
@@ -83,6 +84,7 @@ html.dark {
   --home-adjust: var(--coral-muted);
   --home-adjust-disabled: #252d45;
   --home-adjust-ink: var(--coral-soft);
+  --home-name: #ff9a5c;
   --home-outer-ring: rgba(255, 255, 255, 0.14);
   --background: #0b1020;
   --foreground: var(--ink);
