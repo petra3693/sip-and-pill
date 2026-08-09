@@ -34,5 +34,6 @@ export const SCREEN_META: {
   { id: "medications", label: "Medications" },
   { id: "reminders", label: "Reminders" },
   { id: "home", label: "Home" },
+  { id: "about", label: "About" },
   { id: "settings", label: "Settings" },
 ];

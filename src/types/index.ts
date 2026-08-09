@@ -97,4 +97,4 @@ export type OnboardingStep =
   | "medications"
   | "reminders";
 
-export type AppScreen = OnboardingStep | "home" | "settings";
+export type AppScreen = OnboardingStep | "home" | "settings" | "about";

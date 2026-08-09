@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, type ReactNode } from "react";
+import { AboutScreen } from "@/components/dashboard/AboutScreen";
 import { HomeScreen } from "@/components/dashboard/HomeScreen";
 import { SettingsScreen } from "@/components/dashboard/SettingsScreen";
 import { LanguageScreen } from "@/components/onboarding/LanguageScreen";
@@ -33,6 +34,8 @@ export function renderScreen(screen: AppScreen): ReactNode {
       return <RemindersScreen />;
     case "home":
       return <HomeScreen />;
+    case "about":
+      return <AboutScreen />;
     case "settings":
       return <SettingsScreen />;
     default:

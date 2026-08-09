@@ -3,7 +3,6 @@
 import { useState, type ReactNode } from "react";
 import { BottomNav } from "@/components/dashboard/BottomNav";
 import { ContactSupportModal } from "@/components/dashboard/ContactSupportModal";
-import { SupportModal } from "@/components/dashboard/SupportModal";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { Modal } from "@/components/ui/Modal";
@@ -83,7 +82,6 @@ export function SettingsScreen() {
   const [editingGlass, setEditingGlass] = useState(false);
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
   const [medDraft, setMedDraft] = useState("");
-  const [supportOpen, setSupportOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
 
@@ -369,28 +367,6 @@ export function SettingsScreen() {
           </section>
         ) : null}
 
-        <section className="mb-4 rounded-[24px] bg-[var(--purple)] p-5 text-white">
-          <div className="mb-4 flex items-center gap-2">
-            <Icon name="heart" size={24} />
-            <h2 className="text-[16px] font-black">{t("supportDeveloper")}</h2>
-          </div>
-          <p className="mb-4 text-[14px] font-normal leading-5 text-white/80">
-            {t("supportBlurb")}
-          </p>
-          <Button onClick={() => setSupportOpen(true)}>
-            {t("supportDeveloper")}
-          </Button>
-        </section>
-
-        <section className="mb-4 rounded-[24px] border border-[var(--border)] bg-white px-4 py-[18px]">
-          <h2 className="text-[16px] font-extrabold text-[var(--ink)]">
-            {t("whyBuilt")}
-          </h2>
-          <p className="mt-2 text-[14px] font-normal leading-5 text-[var(--muted)]">
-            {t("whyBuiltBlurb")}
-          </p>
-        </section>
-
         <section className="mb-4 overflow-hidden rounded-[24px] border border-[var(--border)] bg-white px-4">
           <SettingsRow
             label={t("dataStoredLocally")}
@@ -442,8 +418,6 @@ export function SettingsScreen() {
       </div>
 
       <BottomNav />
-
-      <SupportModal open={supportOpen} onClose={() => setSupportOpen(false)} />
 
       <ContactSupportModal
         open={contactOpen}
