@@ -14,7 +14,7 @@ import { useDashboardChrome } from "@/hooks/useDashboardChrome";
 import { useT } from "@/hooks/useT";
 import { APP_SHARE_URL } from "@/lib/appLinks";
 import {
-  clampWaterMl,
+  glassesFromGoal,
   GLASS_SIZE_OPTIONS,
   LANGUAGES,
   MAX_WATER_ML,
@@ -70,6 +70,7 @@ export function SettingsScreen() {
     setScreen,
     setLanguage,
     setTheme,
+    setName,
     updateNotifications,
     updateWater,
     updateMedication,
@@ -81,14 +82,16 @@ export function SettingsScreen() {
 
   const [editingGoal, setEditingGoal] = useState(false);
   const [editingGlass, setEditingGlass] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(prefs.name);
   const [editingMedId, setEditingMedId] = useState<string | null>(null);
   const [medDraft, setMedDraft] = useState("");
   const [contactOpen, setContactOpen] = useState(false);
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
 
-  const maxGlasses = Math.max(
-    1,
-    Math.round(prefs.water.dailyGoalMl / prefs.water.glassSizeMl)
+  const maxGlasses = glassesFromGoal(
+    prefs.water.dailyGoalMl,
+    prefs.water.glassSizeMl,
   );
 
   const waterEnabled = prefs.notifications.waterReminders;
@@ -157,6 +160,18 @@ export function SettingsScreen() {
     setEditingMedId(null);
   };
 
+  const openNameEdit = () => {
+    setNameDraft(prefs.name);
+    setEditingName(true);
+  };
+
+  const saveNameEdit = () => {
+    const next = nameDraft.trim();
+    if (!next) return;
+    setName(next);
+    setEditingName(false);
+  };
+
   return (
     <div className="screen-bg relative flex h-full min-h-0 flex-col overflow-hidden">
       <div className="relative z-10 safe-top min-h-0 flex-1 overflow-y-auto px-6 pb-16 scrollbar-hide">
@@ -189,7 +204,26 @@ export function SettingsScreen() {
         </header>
 
         <section className="mb-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4">
-          <div className="flex min-h-11 items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-normal text-[var(--muted)]">
+                {t("yourName")}
+              </p>
+              <p className="truncate text-[14px] font-bold text-[var(--ink)]">
+                {prefs.name.trim() || t("friend")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={openNameEdit}
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)]"
+              aria-label={t("editName")}
+            >
+              {t("edit")}
+              <MaskIcon name="edit" size={12} />
+            </button>
+          </div>
+          <div className="mt-4 flex min-h-11 items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
             <label
               htmlFor="settings-language"
               className="text-[14px] font-semibold text-[var(--ink)]"
@@ -446,6 +480,47 @@ export function SettingsScreen() {
         </p>
       </Modal>
 
+      <Modal
+        open={editingName}
+        title={t("editName")}
+        onClose={() => setEditingName(false)}
+        footer={
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => setEditingName(false)}
+              className="flex-1"
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={saveNameEdit}
+              disabled={!nameDraft.trim()}
+              className="flex-1"
+            >
+              {t("save")}
+            </Button>
+          </div>
+        }
+      >
+        <label className="block">
+          <span className="mb-2 block text-[12px] font-bold text-[var(--muted)]">
+            {t("yourName")}
+          </span>
+          <div className="flex h-14 items-center rounded-3xl border border-[var(--border)] bg-[var(--bg-peach)] px-4">
+            <input
+              type="text"
+              value={nameDraft}
+              onChange={(e) => setNameDraft(e.target.value)}
+              placeholder={t("enterYourName")}
+              maxLength={32}
+              autoFocus
+              className="min-w-0 w-full bg-transparent text-[18px] font-extrabold text-[var(--ink)] outline-none placeholder:text-[var(--muted)]"
+            />
+          </div>
+        </label>
+      </Modal>
+
       <NumberInputModal
         open={editingGoal}
         title={t("editDailyGoal")}
@@ -454,7 +529,7 @@ export function SettingsScreen() {
         min={MIN_WATER_ML}
         max={MAX_WATER_ML}
         onClose={() => setEditingGoal(false)}
-        onSave={(value) => updateWater({ dailyGoalMl: clampWaterMl(value) })}
+        onSave={(value) => updateWater({ dailyGoalMl: value })}
       />
 
       <NumberInputModal
@@ -472,7 +547,7 @@ export function SettingsScreen() {
             );
           updateWater({
             glassSizeMl: nearest,
-            dailyGoalMl: clampWaterMl(maxGlasses * nearest),
+            dailyGoalMl: maxGlasses * nearest,
           });
         }}
       />

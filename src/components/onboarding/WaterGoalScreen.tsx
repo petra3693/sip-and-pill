@@ -7,7 +7,7 @@ import { useApp } from "@/context/AppContext";
 import { useT } from "@/hooks/useT";
 import { MASCOTS } from "@/lib/assets";
 import {
-  clampWaterMl,
+  glassesFromGoal,
   GLASS_SIZE_OPTIONS,
   MAX_WATER_ML,
   MIN_WATER_ML,
@@ -18,19 +18,19 @@ export function WaterGoalScreen() {
   const { prefs, updateWater, goToNextOnboarding } = useApp();
   const t = useT();
   const { dailyGoalMl, glassSizeMl } = prefs.water;
-  const glasses = Math.max(1, Math.round(dailyGoalMl / glassSizeMl));
+  const glasses = glassesFromGoal(dailyGoalMl, glassSizeMl);
   const maxGlasses = Math.max(1, Math.floor(MAX_WATER_ML / glassSizeMl));
   const minGlasses = Math.max(1, Math.ceil(MIN_WATER_ML / glassSizeMl));
 
   const adjustGlasses = (delta: number) => {
     const nextGlasses = Math.min(maxGlasses, Math.max(minGlasses, glasses + delta));
-    updateWater({ dailyGoalMl: clampWaterMl(nextGlasses * glassSizeMl) });
+    updateWater({ dailyGoalMl: nextGlasses * glassSizeMl });
   };
 
   const setGlassSize = (size: number) => {
     updateWater({
       glassSizeMl: size,
-      dailyGoalMl: clampWaterMl(glasses * size),
+      dailyGoalMl: glasses * size,
     });
   };
 

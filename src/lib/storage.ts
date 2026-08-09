@@ -1,4 +1,10 @@
-import { DEFAULT_PREFERENCES, LANGUAGES, STORAGE_KEY, todayKey } from "@/lib/constants";
+import {
+  DEFAULT_PREFERENCES,
+  LANGUAGES,
+  normalizeWaterSettings,
+  STORAGE_KEY,
+  todayKey,
+} from "@/lib/constants";
 import type { AppTheme, LanguageCode, UserPreferences } from "@/types";
 
 const LANGUAGE_CODES = new Set(LANGUAGES.map((lang) => lang.code));
@@ -70,10 +76,10 @@ export function loadPreferences(): UserPreferences {
       ...parsed,
       language: normalizeLanguage(parsed.language),
       theme: normalizeTheme(parsed.theme),
-      water: {
+      water: normalizeWaterSettings({
         ...DEFAULT_PREFERENCES.water,
         ...parsed.water,
-      },
+      }),
       reminders: {
         ...DEFAULT_PREFERENCES.reminders,
         ...parsed.reminders,

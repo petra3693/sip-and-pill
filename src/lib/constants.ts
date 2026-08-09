@@ -150,3 +150,45 @@ export function createId(prefix: string): string {
 export function clampWaterMl(ml: number): number {
   return Math.min(MAX_WATER_ML, Math.max(MIN_WATER_ML, Math.round(ml)));
 }
+
+/** Integer glass count implied by a daily goal and glass size. */
+export function glassesFromGoal(dailyGoalMl: number, glassSizeMl: number): number {
+  const size = Math.max(1, glassSizeMl);
+  const maxGlasses = Math.max(1, Math.floor(MAX_WATER_ML / size));
+  const minGlasses = Math.max(1, Math.ceil(MIN_WATER_ML / size));
+  return Math.min(
+    maxGlasses,
+    Math.max(minGlasses, Math.round(dailyGoalMl / size)),
+  );
+}
+
+/**
+ * Keep daily goal as an exact multiple of glass size (tracking is per glass).
+ * Also clamps logged glasses if the goal shrinks.
+ */
+export function normalizeWaterSettings(water: {
+  dailyGoalMl: number;
+  glassSizeMl: number;
+  glassesLoggedToday: number;
+}): {
+  dailyGoalMl: number;
+  glassSizeMl: number;
+  glassesLoggedToday: number;
+} {
+  const glassSizeMl = GLASS_SIZE_OPTIONS.includes(
+    water.glassSizeMl as (typeof GLASS_SIZE_OPTIONS)[number],
+  )
+    ? water.glassSizeMl
+    : GLASS_SIZE_OPTIONS.reduce((best, size) =>
+        Math.abs(size - water.glassSizeMl) < Math.abs(best - water.glassSizeMl)
+          ? size
+          : best,
+      );
+  const glasses = glassesFromGoal(water.dailyGoalMl, glassSizeMl);
+  const dailyGoalMl = glasses * glassSizeMl;
+  const glassesLoggedToday = Math.min(
+    glasses,
+    Math.max(0, Math.round(water.glassesLoggedToday)),
+  );
+  return { dailyGoalMl, glassSizeMl, glassesLoggedToday };
+}

@@ -11,10 +11,10 @@ import {
 } from "react";
 import {
   buildMedReminders,
-  clampWaterMl,
   createId,
   DEFAULT_PREFERENCES,
   DEFAULT_REMINDERS,
+  normalizeWaterSettings,
   notificationsFromSetup,
   todayKey,
 } from "@/lib/constants";
@@ -327,17 +327,11 @@ export function AppProvider({
 
   const updateWater = useCallback(
     (partial: Partial<WaterSettings>) => {
-      updatePrefs((prev) => {
-        const nextWater = { ...prev.water, ...partial };
-        if (partial.dailyGoalMl != null) {
-          nextWater.dailyGoalMl = clampWaterMl(partial.dailyGoalMl);
-        }
-        return {
-          ...prev,
-          water: nextWater,
-          lastLogDate: todayKey(),
-        };
-      });
+      updatePrefs((prev) => ({
+        ...prev,
+        water: normalizeWaterSettings({ ...prev.water, ...partial }),
+        lastLogDate: todayKey(),
+      }));
     },
     [updatePrefs]
   );
@@ -494,18 +488,19 @@ export function AppProvider({
   const logGlass = useCallback(
     (delta: number) => {
       updatePrefs((prev) => {
+        const water = normalizeWaterSettings(prev.water);
         const maxGlasses = Math.max(
           1,
-          Math.round(prev.water.dailyGoalMl / prev.water.glassSizeMl)
+          Math.round(water.dailyGoalMl / water.glassSizeMl),
         );
         const next = Math.min(
           maxGlasses,
-          Math.max(0, prev.water.glassesLoggedToday + delta)
+          Math.max(0, water.glassesLoggedToday + delta),
         );
         return {
           ...prev,
           lastLogDate: todayKey(),
-          water: { ...prev.water, glassesLoggedToday: next },
+          water: { ...water, glassesLoggedToday: next },
         };
       });
     },

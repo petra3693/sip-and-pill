@@ -8,16 +8,11 @@ import {
   type CelebrationKind,
 } from "@/components/ui/CelebrationOverlay";
 import { MaskIcon } from "@/components/ui/Icon";
-import { NumberInputModal } from "@/components/ui/NumberInputModal";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useApp } from "@/context/AppContext";
 import { useDashboardChrome } from "@/hooks/useDashboardChrome";
 import { useT } from "@/hooks/useT";
-import {
-  clampWaterMl,
-  MAX_WATER_ML,
-  MIN_WATER_ML,
-} from "@/lib/constants";
+import { glassesFromGoal } from "@/lib/constants";
 import type { TranslationKey } from "@/lib/i18n";
 import type { MedTimeSlot } from "@/types";
 
@@ -30,42 +25,22 @@ const SLOT_LABEL_KEYS: Record<MedTimeSlot, TranslationKey> = {
   night: "night",
 };
 
-function formatGoalLiters(ml: number): string {
-  const liters = ml / 1000;
-  return Number.isInteger(liters) ? String(liters) : liters.toFixed(1);
-}
-
-function DropBadge() {
-  return (
-    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--purple)] shadow-sm outline outline-1 outline-[var(--border)]">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M12 3C12 3 6.5 10.2 6.5 14.2a5.5 5.5 0 0 0 11 0C17.5 10.2 12 3 12 3Z"
-          fill="currentColor"
-        />
-      </svg>
-    </span>
-  );
-}
-
 export function HomeScreen() {
   useDashboardChrome();
 
   const {
     prefs,
     logGlass,
-    updateWater,
     toggleMedicationTaken,
     markCelebrationShown,
   } = useApp();
   const t = useT();
   const showWater = prefs.trackingMode !== "meds";
   const showMeds = prefs.trackingMode !== "water";
-  const [editingGoal, setEditingGoal] = useState(false);
 
-  const maxGlasses = Math.max(
-    1,
-    Math.round(prefs.water.dailyGoalMl / prefs.water.glassSizeMl),
+  const maxGlasses = glassesFromGoal(
+    prefs.water.dailyGoalMl,
+    prefs.water.glassSizeMl,
   );
   const logged = prefs.water.glassesLoggedToday;
   const mlLogged = logged * prefs.water.glassSizeMl;
@@ -118,30 +93,11 @@ export function HomeScreen() {
     <div className="screen-bg relative flex h-full min-h-0 flex-col overflow-hidden">
       <div className="relative z-10 safe-top min-h-0 flex-1 overflow-y-auto px-5 pb-16 scrollbar-hide">
         <header className="mb-2 flex items-center gap-3 pt-1">
-          {showWater ? (
-            <button
-              type="button"
-              onClick={() => setEditingGoal(true)}
-              aria-label={t("editDailyGoal")}
-              className="flex min-w-0 flex-1 items-center gap-3 text-left transition active:opacity-80"
-            >
-              <DropBadge />
-              <span className="min-w-0 flex-1 text-[15px] font-bold leading-snug text-[var(--ink)]">
-                {t("dailyGoalLiters", {
-                  liters: formatGoalLiters(prefs.water.dailyGoalMl),
-                })}
-              </span>
-            </button>
-          ) : (
-            <>
-              <DropBadge />
-              <p className="min-w-0 flex-1 text-[15px] font-bold leading-snug text-[var(--ink)]">
-                {t("hiName", {
-                  name: prefs.name.trim() || t("friend"),
-                })}
-              </p>
-            </>
-          )}
+          <p className="min-w-0 flex-1 text-[17px] font-extrabold leading-snug text-[var(--ink)]">
+            {t("hiName", {
+              name: prefs.name.trim() || t("friend"),
+            })}
+          </p>
           <ThemeToggle />
         </header>
 
@@ -158,15 +114,7 @@ export function HomeScreen() {
               {t("glassesOf", { logged, max: maxGlasses })}
             </p>
           </section>
-        ) : (
-          <header className="mb-4 pt-6 text-center">
-            <h1 className="text-[2rem] font-extrabold text-[var(--ink)]">
-              {t("hiName", {
-                name: prefs.name.trim() || t("friend"),
-              })}
-            </h1>
-          </header>
-        )}
+        ) : null}
 
         {showMeds ? (
           <section className="mt-5 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4 animate-fade-in backdrop-blur-sm">
@@ -243,17 +191,6 @@ export function HomeScreen() {
           onDismiss={dismissCelebration}
         />
       ) : null}
-
-      <NumberInputModal
-        open={editingGoal}
-        title={t("editDailyGoal")}
-        label={t("dailyGoalMl")}
-        value={prefs.water.dailyGoalMl}
-        min={MIN_WATER_ML}
-        max={MAX_WATER_ML}
-        onClose={() => setEditingGoal(false)}
-        onSave={(value) => updateWater({ dailyGoalMl: clampWaterMl(value) })}
-      />
     </div>
   );
 }
