@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { AppVersion } from "@/components/ui/AppVersion";
 import { Button } from "@/components/ui/Button";
 import { useApp } from "@/context/AppContext";
 import { useScreenChrome } from "@/hooks/useScreenChrome";
@@ -74,6 +75,8 @@ export function SplashScreen() {
             </p>
           </div>
         ) : null}
+
+        <AppVersion className="mt-4 shrink-0" />
       </div>
     </div>
   );
