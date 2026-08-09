@@ -22,7 +22,7 @@ function GalleryContent() {
         </div>
         <Link
           href="/"
-          className="rounded-full bg-[var(--coral)] px-5 py-2.5 text-sm font-bold text-white"
+          className="rounded-full bg-[var(--coral)] px-5 py-2.5 text-sm font-bold text-[var(--cta-ink)]"
         >
           Open app flow →
         </Link>

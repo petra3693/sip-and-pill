@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { Icon, MascotImage } from "@/components/ui/Icon";
+import { Icon, MaskIcon, MascotImage } from "@/components/ui/Icon";
 import { ScreenShell } from "@/components/ui/ScreenShell";
 import { useApp } from "@/context/AppContext";
 import { useT } from "@/hooks/useT";
@@ -42,7 +42,7 @@ export function WaterGoalScreen() {
         <Button onClick={goToNextOnboarding}>{t("confirmGoal")}</Button>
       }
     >
-      <div className="rounded-[24px] bg-[var(--purple)] p-6 text-center text-white shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
+      <div className="rounded-[24px] bg-[var(--purple)] p-6 text-center text-[var(--cta-ink)] shadow-[0_10px_24px_rgba(0,0,0,0.08)]">
         <div className="flex flex-col items-center">
           <div className="animate-flex">
             <MascotImage
@@ -62,10 +62,10 @@ export function WaterGoalScreen() {
           <button
             type="button"
             onClick={() => adjustGlasses(-1)}
-            className="flex size-11 items-center justify-center rounded-[22px] bg-[var(--coral-muted)]"
+            className="flex size-11 items-center justify-center rounded-[22px] bg-[var(--coral-muted)] text-[var(--coral)]"
             aria-label={t("decreaseGlasses")}
           >
-            <Icon name="minus" size={20} />
+            <MaskIcon name="minus" size={20} />
           </button>
           <div className="min-w-[100px] text-center">
             <p className="text-[16px] font-extrabold">
@@ -79,15 +79,15 @@ export function WaterGoalScreen() {
           <button
             type="button"
             onClick={() => adjustGlasses(1)}
-            className="flex size-11 items-center justify-center rounded-[22px] bg-[var(--coral-muted)]"
+            className="flex size-11 items-center justify-center rounded-[22px] bg-[var(--coral-muted)] text-[var(--coral)]"
             aria-label={t("increaseGlasses")}
           >
-            <Icon name="plus" size={20} />
+            <MaskIcon name="plus" size={20} />
           </button>
         </div>
       </div>
 
-      <div className="mt-5 rounded-[24px] border border-[var(--border)] bg-white p-4">
+      <div className="mt-5 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4">
         <p className="mb-2 text-[15px] font-bold text-[var(--ink)]">
           {t("whatSizeGlass")}
         </p>
@@ -102,8 +102,8 @@ export function WaterGoalScreen() {
                 className={[
                   "flex-1 rounded-full px-1 py-2 text-[13px] font-bold transition-all",
                   selected
-                    ? "bg-[var(--purple)] text-white"
-                    : "border border-[var(--border)] bg-white text-[var(--ink)]",
+                    ? "bg-[var(--purple)] text-[var(--cta-ink)]"
+                    : "border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)]",
                 ].join(" ")}
               >
                 {size}ml

@@ -45,7 +45,7 @@ export function NameScreen() {
 
         <label className="mt-4 w-full">
           <span className="sr-only">{t("yourName")}</span>
-          <div className="flex h-14 items-center rounded-3xl bg-white px-4 outline outline-1 outline-offset-[-1px] outline-[var(--border)]">
+          <div className="flex h-14 items-center rounded-3xl bg-[var(--surface)] px-4 outline outline-1 outline-offset-[-1px] outline-[var(--border)]">
             <input
               type="text"
               value={prefs.name}

@@ -1,17 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BottomNav } from "@/components/dashboard/BottomNav";
+import { HomeGauge } from "@/components/dashboard/HomeGauge";
 import {
   CelebrationOverlay,
   type CelebrationKind,
 } from "@/components/ui/CelebrationOverlay";
-import { Icon } from "@/components/ui/Icon";
-import { RadialProgress } from "@/components/ui/RadialProgress";
+import { MaskIcon } from "@/components/ui/Icon";
+import { NumberInputModal } from "@/components/ui/NumberInputModal";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useApp } from "@/context/AppContext";
-import { useScreenChrome } from "@/hooks/useScreenChrome";
+import { useDashboardChrome } from "@/hooks/useDashboardChrome";
 import { useT } from "@/hooks/useT";
-import { CHROME_PEACH } from "@/lib/chrome";
+import {
+  clampWaterMl,
+  MAX_WATER_ML,
+  MIN_WATER_ML,
+} from "@/lib/constants";
 import type { TranslationKey } from "@/lib/i18n";
 import type { MedTimeSlot } from "@/types";
 
@@ -24,18 +30,38 @@ const SLOT_LABEL_KEYS: Record<MedTimeSlot, TranslationKey> = {
   night: "night",
 };
 
+function formatGoalLiters(ml: number): string {
+  const liters = ml / 1000;
+  return Number.isInteger(liters) ? String(liters) : liters.toFixed(1);
+}
+
+function DropBadge() {
+  return (
+    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--purple)] shadow-sm outline outline-1 outline-[var(--border)]">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M12 3C12 3 6.5 10.2 6.5 14.2a5.5 5.5 0 0 0 11 0C17.5 10.2 12 3 12 3Z"
+          fill="currentColor"
+        />
+      </svg>
+    </span>
+  );
+}
+
 export function HomeScreen() {
-  useScreenChrome("light");
+  useDashboardChrome();
 
   const {
     prefs,
     logGlass,
+    updateWater,
     toggleMedicationTaken,
     markCelebrationShown,
   } = useApp();
   const t = useT();
   const showWater = prefs.trackingMode !== "meds";
   const showMeds = prefs.trackingMode !== "water";
+  const [editingGoal, setEditingGoal] = useState(false);
 
   const maxGlasses = Math.max(
     1,
@@ -74,13 +100,6 @@ export function HomeScreen() {
     }
   }, [waterComplete, medsGoalComplete, prefs.celebrations]);
 
-  const displayName = prefs.name.trim() || t("friend");
-
-  const greeting = useMemo(
-    () => t("hiName", { name: displayName }),
-    [displayName, t],
-  );
-
   const dismissCelebration = () => {
     if (!activeCelebration) return;
     markCelebrationShown(activeCelebration);
@@ -91,65 +110,66 @@ export function HomeScreen() {
     setActiveCelebration(null);
   };
 
+  const selectGlasses = (count: number) => {
+    logGlass(count - logged);
+  };
+
   return (
-    <div
-      className="relative flex h-full min-h-0 flex-col"
-      style={{
-        backgroundColor: CHROME_PEACH,
-        backgroundImage: "none",
-        background: CHROME_PEACH,
-      }}
-    >
-      <div className="safe-top min-h-0 flex-1 overflow-y-auto px-6 pb-4 scrollbar-hide">
-        <header className="mb-5 pt-1 text-center">
-          <h1 className="break-words px-1 text-[2rem] font-extrabold leading-snug text-[var(--ink)]">
-            {greeting}
-          </h1>
+    <div className="screen-bg relative flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="relative z-10 safe-top min-h-0 flex-1 overflow-y-auto px-5 pb-16 scrollbar-hide">
+        <header className="mb-2 flex items-center gap-3 pt-1">
+          {showWater ? (
+            <button
+              type="button"
+              onClick={() => setEditingGoal(true)}
+              aria-label={t("editDailyGoal")}
+              className="flex min-w-0 flex-1 items-center gap-3 text-left transition active:opacity-80"
+            >
+              <DropBadge />
+              <span className="min-w-0 flex-1 text-[15px] font-bold leading-snug text-[var(--ink)]">
+                {t("dailyGoalLiters", {
+                  liters: formatGoalLiters(prefs.water.dailyGoalMl),
+                })}
+              </span>
+            </button>
+          ) : (
+            <>
+              <DropBadge />
+              <p className="min-w-0 flex-1 text-[15px] font-bold leading-snug text-[var(--ink)]">
+                {t("hiName", {
+                  name: prefs.name.trim() || t("friend"),
+                })}
+              </p>
+            </>
+          )}
+          <ThemeToggle />
         </header>
 
         {showWater ? (
-          <section className="rounded-[24px] bg-[var(--purple)] p-6 text-white shadow-[0_10px_24px_rgba(0,0,0,0.08)] animate-fade-in">
-            <p className="text-center text-[12px] font-bold uppercase tracking-wide text-white/80">
-              {t("hydrationLevel")}
+          <section className="home-gauge-panel animate-fade-in">
+            <HomeGauge
+              percent={waterPercent}
+              logged={logged}
+              maxGlasses={maxGlasses}
+              onAdjust={logGlass}
+              onSelectGlasses={selectGlasses}
+            />
+            <p className="mt-1 text-center text-[13px] font-semibold text-[var(--muted)]">
+              {t("glassesOf", { logged, max: maxGlasses })}
             </p>
-            <div className="mt-4 flex justify-center">
-              <RadialProgress percent={waterPercent} />
-            </div>
-
-            <div className="mt-6 flex items-center justify-center gap-4">
-              <button
-                type="button"
-                onClick={() => logGlass(-1)}
-                disabled={logged <= 0}
-                className="flex size-11 items-center justify-center rounded-[22px] bg-[var(--coral-muted)] disabled:opacity-40"
-                aria-label={t("removeGlass")}
-              >
-                <Icon name="minus" size={20} />
-              </button>
-              <div className="text-center">
-                <p className="text-[23px] font-bold text-[var(--coral-soft)]">
-                  {t("glassesOf", { logged, max: maxGlasses })}
-                </p>
-                <p className="text-[15px] font-bold text-white">
-                  {mlLogged.toLocaleString()} /{" "}
-                  {prefs.water.dailyGoalMl.toLocaleString()} ml
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => logGlass(1)}
-                disabled={logged >= maxGlasses}
-                className="flex size-11 items-center justify-center rounded-[22px] bg-[var(--coral-muted)] disabled:opacity-40"
-                aria-label={t("addGlass")}
-              >
-                <Icon name="plus" size={20} />
-              </button>
-            </div>
           </section>
-        ) : null}
+        ) : (
+          <header className="mb-4 pt-6 text-center">
+            <h1 className="text-[2rem] font-extrabold text-[var(--ink)]">
+              {t("hiName", {
+                name: prefs.name.trim() || t("friend"),
+              })}
+            </h1>
+          </header>
+        )}
 
         {showMeds ? (
-          <section className="mt-5 rounded-[24px] border border-[var(--border)] bg-white p-4 animate-fade-in">
+          <section className="mt-5 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4 animate-fade-in backdrop-blur-sm">
             <h2 className="mb-4 text-[16px] font-extrabold text-[var(--ink)]">
               {t("medicationCompanion")}
             </h2>
@@ -159,22 +179,29 @@ export function HomeScreen() {
                   {t("noMedsYet")}
                 </p>
               ) : (
-                prefs.medications.map((med) => (
+                prefs.medications.map((med) => {
+                  const status = med.takenToday
+                    ? t("markedTaken")
+                    : t("notTakenYet");
+                  return (
                   <button
                     key={med.id}
                     type="button"
                     onClick={() => toggleMedicationTaken(med.id)}
-                    className="flex w-full items-center gap-3 rounded-[16px] bg-[#fff8f6] p-2.5 text-left transition active:scale-[0.99]"
+                    aria-pressed={med.takenToday}
+                    aria-label={`${med.name}, ${status}`}
+                    className="flex min-h-11 w-full items-center gap-3 rounded-[16px] bg-[var(--surface-muted)] p-2.5 text-left transition active:scale-[0.99]"
                   >
                     <span
                       className={[
                         "flex size-8 items-center justify-center rounded-lg",
                         med.takenToday
-                          ? "bg-[var(--privacy)]"
-                          : "bg-[var(--coral-muted)]",
+                          ? "bg-[var(--privacy)] text-[var(--success)]"
+                          : "bg-[var(--coral-muted)] text-[var(--coral)]",
                       ].join(" ")}
+                      aria-hidden
                     >
-                      <Icon name="pill" size={18} />
+                      <MaskIcon name="pill" size={18} />
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[14px] font-extrabold text-[var(--ink)]">
@@ -186,19 +213,22 @@ export function HomeScreen() {
                     </div>
                     <span
                       className={[
-                        "flex size-[34px] shrink-0 items-center justify-center rounded-[22px]",
+                        "flex size-11 shrink-0 items-center justify-center rounded-full border-2",
                         med.takenToday
-                          ? "bg-[var(--success)]"
-                          : "bg-[#d9d2d0]",
+                          ? "border-[var(--success)] bg-[var(--success)] text-white"
+                          : "border-[var(--border)] bg-transparent text-transparent",
                       ].join(" ")}
-                      aria-label={
-                        med.takenToday ? t("markedTaken") : t("notTakenYet")
-                      }
+                      aria-hidden
                     >
-                      <Icon name="check" size={14} />
+                      {med.takenToday ? (
+                        <MaskIcon name="check" size={14} />
+                      ) : (
+                        <span className="size-3.5 rounded-full border-2 border-[var(--muted)]" />
+                      )}
                     </span>
                   </button>
-                ))
+                  );
+                })
               )}
             </div>
           </section>
@@ -213,6 +243,17 @@ export function HomeScreen() {
           onDismiss={dismissCelebration}
         />
       ) : null}
+
+      <NumberInputModal
+        open={editingGoal}
+        title={t("editDailyGoal")}
+        label={t("dailyGoalMl")}
+        value={prefs.water.dailyGoalMl}
+        min={MIN_WATER_ML}
+        max={MAX_WATER_ML}
+        onClose={() => setEditingGoal(false)}
+        onSave={(value) => updateWater({ dailyGoalMl: clampWaterMl(value) })}
+      />
     </div>
   );
 }

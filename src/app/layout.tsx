@@ -29,18 +29,20 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  // Neutral default — each screen sets theme-color for its own surface.
-  themeColor: "#fff8f6",
+  // Dark default — each screen may override via applyScreenChrome.
+  themeColor: "#0b1020",
   viewportFit: "cover",
 };
 
 /**
  * Root stays neutral. No global status-bar color blocks.
  * Legacy tint nodes are stripped if an older build left them behind.
+ * App defaults to dark; light only applies on dashboard after hydrate.
  */
 const BOOT_CLEANUP_SCRIPT = `
 (function () {
   try {
+    document.documentElement.classList.add("dark");
     document.getElementById("sip-safari-tint-top")?.remove();
     document.getElementById("sip-safari-tint-bottom")?.remove();
   } catch (e) {}
@@ -53,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: BOOT_CLEANUP_SCRIPT }} />
       </head>

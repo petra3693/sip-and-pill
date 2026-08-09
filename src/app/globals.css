@@ -6,18 +6,35 @@
   --coral: #ff6b52;
   --coral-soft: #ff6b6b;
   --coral-muted: #ffece6;
+  /* Dark label on coral CTAs (better contrast than white on bright coral) */
+  --cta-ink: #1a1220;
+  --danger: #c43c2e;
   --purple: #5c4d9a;
   --indigo: #5c4d9a;
   --indigo-deep: #4a3d82;
   --ink: #2d2a2a;
-  --muted: #8a807e;
+  --muted: #6f6765;
   --success: #78c193;
   --border: #d1cfce;
   --surface: #ffffff;
+  --surface-muted: #f0ebe8;
   --tip: #e6e0ff;
   --yellow: #ffc72c;
   --cream: #fff9db;
   --privacy: #eef8f2;
+  --progress-ring: #ff6b6b;
+  --progress-track: rgba(92, 77, 154, 0.18);
+  --progress-glow: transparent;
+  --untaken: #c4bbb8;
+  --home-canvas: var(--bg-peach);
+  --home-gauge-text: var(--ink);
+  --home-marker: #6f6765;
+  --home-marker-active: #5c4d9a;
+  /* Stronger than coral-muted so +/- read on peach home canvas */
+  --home-adjust: #ffd0c4;
+  --home-adjust-disabled: #e5ddd9;
+  --home-adjust-ink: var(--cta-ink);
+  --home-outer-ring: rgba(92, 77, 154, 0.2);
   --background: var(--bg-peach);
   --foreground: var(--ink);
   --app-chrome: #fff8f6;
@@ -28,6 +45,59 @@
   );
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/*
+ * App dark mode — matches sip-and-pill.app marketing site atmosphere.
+ * Cyan hydration ring kept for the in-app gauge.
+ */
+html.dark {
+  --bg-peach: #12182b;
+  --bg-peach-deep: #1a2238;
+  --coral: #ff7e70;
+  --coral-soft: #ff9a8f;
+  --coral-muted: #2a2438;
+  --cta-ink: #1a1220;
+  --danger: #ff8a7a;
+  --purple: #a598e0;
+  --indigo: #a598e0;
+  --indigo-deep: #7e70b8;
+  --ink: #f4f6fb;
+  --muted: #b8c0d4;
+  --success: #8fd0a6;
+  --border: #2c3550;
+  --surface: #1a2238;
+  --surface-muted: #151c30;
+  --tip: #252d45;
+  --yellow: #ffd45c;
+  --cream: #3a3220;
+  --privacy: #1e3a2a;
+  --progress-ring: #7ee8ff;
+  --progress-track: rgba(160, 140, 220, 0.28);
+  --progress-glow: 0 0 18px rgba(126, 232, 255, 0.55);
+  --untaken: #3a3348;
+  --home-canvas: transparent;
+  --home-gauge-text: #f4f6fb;
+  --home-marker: rgba(244, 246, 251, 0.72);
+  --home-marker-active: #7ee8ff;
+  --home-adjust: var(--coral-muted);
+  --home-adjust-disabled: #252d45;
+  --home-adjust-ink: var(--coral-soft);
+  --home-outer-ring: rgba(255, 255, 255, 0.14);
+  --background: #0b1020;
+  --foreground: var(--ink);
+  --app-chrome: #0b1020;
+  /* Site hero glow + deep navy gradient */
+  --hero-glow: radial-gradient(
+    ellipse 70% 60% at 72% 40%,
+    #ff7e7038,
+    #5c4d9a47 40%,
+    transparent 70%
+  );
+  --screen-gradient:
+    var(--hero-glow),
+    radial-gradient(ellipse 90% 70% at 50% -10%, #50468c59, transparent 55%),
+    linear-gradient(180deg, #0b1020, #12182b 55%, #0b1020);
 }
 
 @theme inline {
@@ -78,6 +148,16 @@ input {
   font-family: inherit;
 }
 
+/* Shared keyboard focus for interactive controls */
+:where(button, a, summary, [role="button"], [role="switch"], select, input, textarea):focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
+}
+
+:where(button, a, summary, [role="button"], [role="switch"]).focus-ring-inset:focus-visible {
+  outline-offset: -2px;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -88,8 +168,45 @@ input {
 }
 
 .screen-bg {
-  background-color: var(--bg-peach);
+  background-color: var(--background);
   background-image: var(--screen-gradient);
+}
+
+/*
+ * Hydration gauge panel — identical box model in light + dark so layout
+ * does not jump when toggling theme. Only paint / tokens change.
+ */
+.home-gauge-panel {
+  border-radius: 28px;
+  padding: 0.75rem 0.5rem 1.25rem;
+  background: var(--purple);
+  box-shadow: 0 10px 24px rgba(92, 77, 154, 0.22);
+  /* Nested gauge tokens for contrast on purple */
+  --background: var(--purple);
+  --home-gauge-text: #ffffff;
+  --home-marker: rgba(255, 255, 255, 0.7);
+  --home-marker-active: #ffc72c;
+  --home-outer-ring: rgba(255, 255, 255, 0.38);
+  --muted: rgba(238, 236, 247, 0.92);
+  --progress-track: rgba(255, 255, 255, 0.22);
+  --home-adjust: #ffece6;
+  --home-adjust-disabled: rgba(255, 255, 255, 0.18);
+  --home-adjust-ink: var(--cta-ink);
+}
+
+html.dark .home-gauge-panel {
+  background: transparent;
+  box-shadow: none;
+  --background: #0b1020;
+  --home-gauge-text: #f4f6fb;
+  --home-marker: rgba(244, 246, 251, 0.72);
+  --home-marker-active: #7ee8ff;
+  --home-outer-ring: rgba(255, 255, 255, 0.14);
+  --muted: #b8c0d4;
+  --progress-track: rgba(160, 140, 220, 0.28);
+  --home-adjust: var(--coral-muted);
+  --home-adjust-disabled: #252d45;
+  --home-adjust-ink: var(--coral-soft);
 }
 
 .safe-bottom {
@@ -104,15 +221,21 @@ input {
   padding-top: max(3rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
 }
 
-/* Soft cutout for residual light/dark fringes on character PNGs. */
+/* Soft cutout for residual light fringes on character PNGs (light mode only). */
 .mascot-cutout {
   background: transparent;
   mix-blend-mode: multiply;
 }
 
+/* Dark backgrounds: show PNGs as-is — multiply/screen both wash or crush them. */
+html.dark .mascot-cutout,
+html.dark .mascot-cutout-on-dark {
+  mix-blend-mode: normal;
+}
+
 .mascot-cutout-on-dark {
   background: transparent;
-  mix-blend-mode: screen;
+  mix-blend-mode: normal;
 }
 
 @keyframes float {

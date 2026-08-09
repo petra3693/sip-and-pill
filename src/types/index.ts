@@ -11,6 +11,8 @@ export type LanguageCode =
 
 export type TrackingMode = "water" | "meds" | "both";
 
+export type AppTheme = "light" | "dark";
+
 export type MedTimeSlot =
   | "morning"
   | "midmorning"
@@ -77,6 +79,8 @@ export interface NotificationSettings {
 export interface UserPreferences {
   onboardingComplete: boolean;
   language: LanguageCode;
+  /** Dashboard theme (home / about / settings). Defaults to dark after onboarding. */
+  theme: AppTheme;
   name: string;
   trackingMode: TrackingMode;
   water: WaterSettings;

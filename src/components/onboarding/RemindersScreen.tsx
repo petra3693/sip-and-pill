@@ -63,7 +63,7 @@ export function RemindersScreen() {
       className="relative"
     >
       <div className="flex flex-col gap-3">
-        <div className="rounded-[24px] border border-[var(--border)] bg-white p-3.5 shadow-[0_8px_16px_rgba(92,77,154,0.08)]">
+        <div className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-[0_8px_16px_rgba(92,77,154,0.08)]">
           <p className="mb-5 text-[14px] font-extrabold text-[var(--purple)]">
             {t("howOftenRemind")}
           </p>
@@ -78,8 +78,8 @@ export function RemindersScreen() {
                   className={[
                     "flex-1 rounded-full px-1 py-1.5 text-[11px] font-bold transition-all",
                     selected
-                      ? "bg-[var(--purple)] text-white"
-                      : "bg-[#fff8f6] text-[var(--ink)]",
+                      ? "bg-[var(--purple)] text-[var(--cta-ink)]"
+                      : "bg-[var(--bg-peach)] text-[var(--ink)]",
                   ].join(" ")}
                 >
                   {t(item.labelKey)}
@@ -100,7 +100,7 @@ export function RemindersScreen() {
         </div>
 
         {showMedReminders && medReminderTimes.length > 0 ? (
-          <div className="rounded-[24px] border border-[var(--border)] bg-white p-3.5 shadow-[0_8px_16px_rgba(92,77,154,0.08)]">
+          <div className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-[0_8px_16px_rgba(92,77,154,0.08)]">
             <p className="mb-2.5 text-[14px] font-extrabold text-[var(--purple)]">
               {t("medicationReminders")}
             </p>

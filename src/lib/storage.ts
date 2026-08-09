@@ -1,5 +1,5 @@
 import { DEFAULT_PREFERENCES, LANGUAGES, STORAGE_KEY, todayKey } from "@/lib/constants";
-import type { LanguageCode, UserPreferences } from "@/types";
+import type { AppTheme, LanguageCode, UserPreferences } from "@/types";
 
 const LANGUAGE_CODES = new Set(LANGUAGES.map((lang) => lang.code));
 
@@ -8,6 +8,11 @@ function normalizeLanguage(code: unknown): LanguageCode {
     return code as LanguageCode;
   }
   return DEFAULT_PREFERENCES.language;
+}
+
+function normalizeTheme(value: unknown): AppTheme {
+  // Default dark; only an explicit "light" preference opts out on dashboard.
+  return value === "light" ? "light" : "dark";
 }
 
 export function resetDailyProgress(prefs: UserPreferences): UserPreferences {
@@ -64,6 +69,7 @@ export function loadPreferences(): UserPreferences {
       ...DEFAULT_PREFERENCES,
       ...parsed,
       language: normalizeLanguage(parsed.language),
+      theme: normalizeTheme(parsed.theme),
       water: {
         ...DEFAULT_PREFERENCES.water,
         ...parsed.water,

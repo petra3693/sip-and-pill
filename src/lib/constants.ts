@@ -93,6 +93,7 @@ export const DEFAULT_REMINDERS: ReminderSchedule = {
 export const DEFAULT_PREFERENCES: UserPreferences = {
   onboardingComplete: false,
   language: "en",
+  theme: "dark",
   name: "",
   trackingMode: "both",
   water: {

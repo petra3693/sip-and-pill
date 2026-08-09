@@ -19,15 +19,15 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex h-14 items-center justify-center gap-2 rounded-full px-6 text-[18px] font-semibold transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex h-14 items-center justify-center gap-2 rounded-full px-6 text-[18px] font-semibold transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-[var(--surface-muted)] disabled:text-[var(--muted)] disabled:opacity-100";
 
   const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
     primary:
-      "bg-[var(--coral)] text-white shadow-[0_8px_16px_rgba(92,77,154,0.08)] hover:brightness-105",
+      "bg-[var(--coral)] text-[var(--cta-ink)] shadow-[0_8px_16px_rgba(92,77,154,0.08)] hover:brightness-105",
     secondary:
-      "bg-white text-[var(--purple)] border border-[var(--border)] shadow-sm",
+      "bg-[var(--surface)] text-[var(--purple)] border border-[var(--border)] shadow-sm",
     ghost: "bg-transparent text-[var(--purple)]",
-    danger: "bg-transparent text-[#e24a4a] font-black",
+    danger: "bg-transparent text-[var(--danger)] font-black",
   };
 
   return (

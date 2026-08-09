@@ -27,6 +27,36 @@ export function Icon({
   );
 }
 
+/** Themed icon via CSS mask — inherits `currentColor` (works in dark mode). */
+export function MaskIcon({
+  name,
+  size = 24,
+  className = "",
+}: {
+  name: string;
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={`inline-block shrink-0 bg-current ${className}`}
+      style={{
+        width: size,
+        height: size,
+        maskImage: `url(/icons/${name}.svg)`,
+        WebkitMaskImage: `url(/icons/${name}.svg)`,
+        maskSize: "contain",
+        WebkitMaskSize: "contain",
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskPosition: "center",
+        WebkitMaskPosition: "center",
+      }}
+    />
+  );
+}
+
 interface MascotImageProps {
   src: MascotAsset | string;
   alt?: string;
@@ -62,7 +92,6 @@ export function MascotImage({
 }: MascotImageProps) {
   const asset = resolveAsset(src);
   const displayMax = maxWidth ?? width ?? 200;
-  const blendMode = blend === "multiply" ? "multiply" : "normal";
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -74,7 +103,8 @@ export function MascotImage({
       decoding="async"
       className={[
         "block shrink-0 bg-transparent object-contain",
-        blend === "multiply" ? "mix-blend-multiply" : "mix-blend-normal",
+        // multiply cutout only in light; dark mode forces normal via CSS
+        blend === "multiply" ? "mascot-cutout" : "",
         className,
       ].join(" ")}
       style={{
@@ -82,7 +112,6 @@ export function MascotImage({
         maxWidth: displayMax,
         height: "auto",
         backgroundColor: "transparent",
-        mixBlendMode: blendMode,
       }}
     />
   );

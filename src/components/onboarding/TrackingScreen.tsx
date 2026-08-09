@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { Icon, MascotImage } from "@/components/ui/Icon";
+import { MaskIcon, MascotImage } from "@/components/ui/Icon";
 import { ScreenShell } from "@/components/ui/ScreenShell";
 import { useApp } from "@/context/AppContext";
 import { useT } from "@/hooks/useT";
@@ -59,13 +59,13 @@ export function TrackingScreen() {
               className={[
                 "relative flex h-[120px] w-full items-center gap-3 rounded-[24px] p-4 text-left transition-all duration-200",
                 selected
-                  ? "bg-[var(--purple)] text-white shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
-                  : "border border-[var(--border)] bg-white text-[var(--ink)]",
+                  ? "bg-[var(--purple)] text-[var(--cta-ink)] shadow-[0_10px_24px_rgba(0,0,0,0.08)]"
+                  : "border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)]",
               ].join(" ")}
             >
               {selected ? (
-                <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-[12px] bg-[var(--coral-soft)]">
-                  <Icon name="check" size={14} />
+                <span className="absolute right-3 top-3 flex size-6 items-center justify-center rounded-[12px] bg-[var(--coral)] text-[var(--cta-ink)]">
+                  <MaskIcon name="check" size={14} />
                 </span>
               ) : null}
               <MascotImage
@@ -81,7 +81,7 @@ export function TrackingScreen() {
                 <p
                   className={[
                     "mt-1 text-[14px] font-normal",
-                    selected ? "text-white/85" : "text-[var(--muted)]",
+                    selected ? "text-[var(--cta-ink)]/75" : "text-[var(--muted)]",
                   ].join(" ")}
                 >
                   {t(option.descKey)}

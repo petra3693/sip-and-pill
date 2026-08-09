@@ -7,12 +7,11 @@ import { useScreenChrome } from "@/hooks/useScreenChrome";
 import { useT } from "@/hooks/useT";
 import { MascotImage } from "@/components/ui/Icon";
 import { MASCOTS } from "@/lib/assets";
-import { CHROME_PURPLE } from "@/lib/chrome";
 
 const BOOT_MS = 2400;
 
 export function SplashScreen() {
-  useScreenChrome("dark");
+  useScreenChrome("night");
 
   const { goToNextOnboarding, prefs, screen } = useApp();
   const t = useT();
@@ -30,14 +29,7 @@ export function SplashScreen() {
   }, [goToNextOnboarding, isBootSplash, screen]);
 
   return (
-    <div
-      className="relative flex h-full min-h-0 w-full flex-col text-white"
-      style={{
-        backgroundColor: CHROME_PURPLE,
-        backgroundImage: "none",
-        background: CHROME_PURPLE,
-      }}
-    >
+    <div className="screen-bg relative flex h-full min-h-0 w-full flex-col text-[var(--ink)]">
       <div className="safe-top flex min-h-0 flex-1 flex-col px-6 pb-8 safe-bottom">
         <div
           className={`flex min-h-0 flex-1 flex-col items-center justify-center gap-6 ${
@@ -45,7 +37,7 @@ export function SplashScreen() {
           }`}
         >
           <div className="size-64 shrink-0 rounded-full bg-[var(--yellow)] p-[6px]">
-            <div className="relative flex size-full items-center justify-center overflow-hidden rounded-full bg-[var(--cream)]">
+            <div className="relative flex size-full items-center justify-center overflow-hidden rounded-full bg-[#fff9db]">
               <div className="flex w-[88%] max-w-[220px] items-center justify-center">
                 <MascotImage
                   src={MASCOTS.splash}
@@ -59,14 +51,14 @@ export function SplashScreen() {
 
           <div className="flex flex-col items-center gap-2">
             <div className="rounded-full bg-[var(--yellow)] px-4 py-1.5">
-              <p className="text-xs font-bold uppercase text-[var(--purple)]">
+              <p className="text-xs font-bold uppercase text-[var(--indigo-deep)]">
                 {t("dailyCompanion")}
               </p>
             </div>
-            <h1 className="text-center text-4xl font-extrabold leading-10">
+            <h1 className="text-center text-4xl font-extrabold leading-10 text-[var(--ink)]">
               Sip &amp; Pill
             </h1>
-            <p className="text-center text-sm font-normal leading-5 text-[#eeecf7]">
+            <p className="text-center text-sm font-normal leading-5 text-[var(--muted)]">
               {t("tagline")}
             </p>
           </div>
@@ -77,7 +69,7 @@ export function SplashScreen() {
             <Button onClick={goToNextOnboarding} showArrow>
               {t("getStarted")}
             </Button>
-            <p className="text-center text-base font-medium text-[#eeecf7]">
+            <p className="text-center text-base font-medium text-[var(--muted)]">
               {t("freeOfflinePrivate")}
             </p>
           </div>

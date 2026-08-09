@@ -1,5 +1,8 @@
+/** Marketing site. */
+export const WEBSITE_URL = "https://www.sip-and-pill.app/";
+
 /** Public share URL used from Settings. */
-export const APP_SHARE_URL = "https://sip-and-pill.vercel.app";
+export const APP_SHARE_URL = WEBSITE_URL;
 
 /**
  * Support inbox used only when composing mail from the in-app form.

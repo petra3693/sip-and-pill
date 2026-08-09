@@ -37,7 +37,7 @@ export function CelebrationOverlay({
       role="alertdialog"
       aria-label={t("hurrah")}
     >
-      <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-center shadow-2xl animate-celebrate">
+      <div className="w-full max-w-sm rounded-[28px] bg-[var(--surface)] p-6 text-center shadow-2xl animate-celebrate">
         <div className="mx-auto mb-3 flex justify-center">
           <MascotImage
             src={asset.src}

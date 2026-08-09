@@ -1,11 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Icon } from "@/components/ui/Icon";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useApp } from "@/context/AppContext";
 import { useScreenChrome } from "@/hooks/useScreenChrome";
 import { useT } from "@/hooks/useT";
+import { CHROME_PURPLE } from "@/lib/chrome";
 
 interface ScreenShellProps {
   children: ReactNode;
@@ -31,7 +31,8 @@ export function ScreenShell({
   contentClassName = "",
   showBack,
 }: ScreenShellProps) {
-  useScreenChrome(dark ? "dark" : "light");
+  // Onboarding stays dark (night); purple variant for splash-like steps.
+  useScreenChrome(dark ? "purple" : "night");
 
   const { goToPreviousOnboarding } = useApp();
   const t = useT();
@@ -41,14 +42,18 @@ export function ScreenShell({
     <div
       className={[
         "h-full min-h-0 w-full overflow-y-auto scrollbar-hide",
-        dark ? "bg-[var(--purple)] text-white" : "text-[var(--ink)]",
+        dark ? "bg-[var(--purple)] text-white" : "screen-bg text-[var(--ink)]",
         className,
       ].join(" ")}
-      style={{
-        backgroundColor: dark ? "#5c4d9a" : "#fff8f6",
-        backgroundImage: "none",
-        background: dark ? "#5c4d9a" : "#fff8f6",
-      }}
+      style={
+        dark
+          ? {
+              backgroundColor: CHROME_PURPLE,
+              backgroundImage: "none",
+              background: CHROME_PURPLE,
+            }
+          : undefined
+      }
     >
       {/*
         Single normal-flow column: progress, title, content, and footer
@@ -84,10 +89,23 @@ export function ScreenShell({
                 <button
                   type="button"
                   onClick={goToPreviousOnboarding}
-                  className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white text-[var(--ink)] shadow-sm outline outline-1 outline-offset-[-1px] outline-[var(--border)] transition-all duration-200 active:scale-[0.98]"
+                  className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] shadow-sm outline outline-1 outline-offset-[-1px] outline-[var(--border)] transition-all duration-200 active:scale-[0.98]"
                   aria-label={t("back")}
                 >
-                  <Icon name="arrow-left" size={20} />
+                  <span
+                    aria-hidden
+                    className="inline-block size-5 bg-[var(--coral)]"
+                    style={{
+                      maskImage: "url(/icons/arrow-left.svg)",
+                      WebkitMaskImage: "url(/icons/arrow-left.svg)",
+                      maskSize: "contain",
+                      WebkitMaskSize: "contain",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskRepeat: "no-repeat",
+                      maskPosition: "center",
+                      WebkitMaskPosition: "center",
+                    }}
+                  />
                 </button>
               ) : null}
 

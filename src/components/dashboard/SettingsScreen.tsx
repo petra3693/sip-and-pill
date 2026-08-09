@@ -4,15 +4,15 @@ import { useState, type ReactNode } from "react";
 import { BottomNav } from "@/components/dashboard/BottomNav";
 import { ContactSupportModal } from "@/components/dashboard/ContactSupportModal";
 import { Button } from "@/components/ui/Button";
-import { Icon } from "@/components/ui/Icon";
+import { Icon, MaskIcon } from "@/components/ui/Icon";
 import { Modal } from "@/components/ui/Modal";
 import { NumberInputModal } from "@/components/ui/NumberInputModal";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { useApp } from "@/context/AppContext";
-import { useScreenChrome } from "@/hooks/useScreenChrome";
+import { useDashboardChrome } from "@/hooks/useDashboardChrome";
 import { useT } from "@/hooks/useT";
 import { APP_SHARE_URL } from "@/lib/appLinks";
-import { CHROME_PEACH } from "@/lib/chrome";
 import {
   clampWaterMl,
   GLASS_SIZE_OPTIONS,
@@ -63,12 +63,13 @@ function SettingsRow({
 }
 
 export function SettingsScreen() {
-  useScreenChrome("light");
+  useDashboardChrome();
 
   const {
     prefs,
     setScreen,
     setLanguage,
+    setTheme,
     updateNotifications,
     updateWater,
     updateMedication,
@@ -157,31 +158,37 @@ export function SettingsScreen() {
   };
 
   return (
-    <div
-      className="relative flex h-full min-h-0 flex-col"
-      style={{
-        backgroundColor: CHROME_PEACH,
-        backgroundImage: "none",
-        background: CHROME_PEACH,
-      }}
-    >
-      <div className="safe-top min-h-0 flex-1 overflow-y-auto px-6 pb-4 scrollbar-hide">
+    <div className="screen-bg relative flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="relative z-10 safe-top min-h-0 flex-1 overflow-y-auto px-6 pb-16 scrollbar-hide">
         <header className="mb-4 flex items-center pt-1">
           <button
             type="button"
             onClick={() => setScreen("home")}
-            className="flex size-11 shrink-0 items-center justify-center rounded-3xl bg-white outline outline-1 outline-offset-[-1px] outline-[#f2e8e4]"
+            className="flex size-11 shrink-0 items-center justify-center rounded-3xl border border-[var(--border)] bg-[var(--surface)]"
             aria-label={t("backToHome")}
           >
-            <Icon name="arrow-left" size={16} />
+            <span
+              aria-hidden
+              className="inline-block size-4 bg-[var(--coral)]"
+              style={{
+                maskImage: "url(/icons/arrow-left.svg)",
+                WebkitMaskImage: "url(/icons/arrow-left.svg)",
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskPosition: "center",
+                WebkitMaskPosition: "center",
+              }}
+            />
           </button>
           <h1 className="min-w-0 flex-1 px-2 text-center text-xl font-extrabold leading-6 text-[var(--ink)]">
             {t("settings")}
           </h1>
-          <span className="w-11 shrink-0" aria-hidden="true" />
+          <ThemeToggle />
         </header>
 
-        <section className="mb-4 rounded-[24px] border border-[var(--border)] bg-white p-4">
+        <section className="mb-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4">
           <div className="flex min-h-11 items-center justify-between gap-3">
             <label
               htmlFor="settings-language"
@@ -197,7 +204,7 @@ export function SettingsScreen() {
                   setLanguage(e.target.value as LanguageCode)
                 }
                 aria-label={t("chooseLanguage")}
-                className="appearance-none rounded-2xl border border-[var(--border)] bg-[#f7f4f2] py-2.5 pl-3 pr-9 text-[14px] font-bold text-[var(--ink)] outline-none transition focus:border-[var(--purple)]"
+                className="appearance-none rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] py-2.5 pl-3 pr-9 text-[14px] font-bold text-[var(--ink)] outline-none transition focus:border-[var(--purple)]"
               >
                 {LANGUAGES.map((lang) => (
                   <option key={lang.code} value={lang.code}>
@@ -213,9 +220,19 @@ export function SettingsScreen() {
               </span>
             </div>
           </div>
+          <div className="mt-4 flex min-h-11 items-center justify-between gap-3 border-t border-[var(--border)] pt-4">
+            <p className="text-[14px] font-semibold text-[var(--ink)]">
+              {t("darkMode")}
+            </p>
+            <ToggleSwitch
+              checked={prefs.theme === "dark"}
+              onChange={(checked) => setTheme(checked ? "dark" : "light")}
+              ariaLabel={t("darkMode")}
+            />
+          </div>
         </section>
 
-        <section className="mb-4 rounded-[24px] border border-[var(--border)] bg-white p-4">
+        <section className="mb-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4">
           <h2 className="mb-4 text-[16px] font-extrabold text-[var(--ink)]">
             {t("notificationSettings")}
           </h2>
@@ -248,18 +265,13 @@ export function SettingsScreen() {
         </section>
 
         {prefs.trackingMode !== "meds" ? (
-          <section
-            className={[
-              "mb-4 rounded-[24px] border border-[var(--border)] bg-white p-4 transition",
-              waterEnabled ? "" : "pointer-events-none opacity-45",
-            ].join(" ")}
-          >
+          <section className="mb-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4">
             <h2 className="mb-4 text-[16px] font-extrabold text-[var(--ink)]">
               {t("waterSettings")}
             </h2>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
                   <p className="text-[11px] font-normal text-[var(--muted)]">
                     {t("dailyTarget")}
                   </p>
@@ -272,16 +284,16 @@ export function SettingsScreen() {
                   type="button"
                   disabled={!waterEnabled}
                   onClick={() => setEditingGoal(true)}
-                  className="flex items-center gap-1 text-[12px] font-extrabold text-[var(--purple)] disabled:opacity-40"
+                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
                   aria-label={t("editDailyGoal")}
                 >
                   {t("edit")}
-                  <Icon name="edit" size={10} />
+                  <MaskIcon name="edit" size={12} />
                 </button>
               </div>
               <div className="h-px w-full bg-[var(--border)]" />
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
                   <p className="text-[11px] font-normal text-[var(--muted)]">
                     {t("glassSize")}
                   </p>
@@ -293,11 +305,11 @@ export function SettingsScreen() {
                   type="button"
                   disabled={!waterEnabled}
                   onClick={() => setEditingGlass(true)}
-                  className="flex items-center gap-1 text-[12px] font-extrabold text-[var(--purple)] disabled:opacity-40"
+                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
                   aria-label={t("editGlassSize")}
                 >
                   {t("edit")}
-                  <Icon name="edit" size={10} />
+                  <MaskIcon name="edit" size={12} />
                 </button>
               </div>
             </div>
@@ -305,12 +317,7 @@ export function SettingsScreen() {
         ) : null}
 
         {prefs.trackingMode !== "water" ? (
-          <section
-            className={[
-              "mb-4 rounded-[24px] border border-[var(--border)] bg-white p-4 transition",
-              pillsEnabled ? "" : "pointer-events-none opacity-45",
-            ].join(" ")}
-          >
+          <section className="mb-4 rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-4">
             <h2 className="mb-4 text-[16px] font-extrabold text-[var(--ink)]">
               {t("medications")}
             </h2>
@@ -318,7 +325,7 @@ export function SettingsScreen() {
               {prefs.medications.map((med) => (
                 <div
                   key={med.id}
-                  className="flex items-center gap-3.5 rounded-[10px] bg-[#eee] p-2"
+                  className="flex min-h-11 items-center gap-2 rounded-[10px] bg-[var(--surface-muted)] p-2"
                 >
                   {editingMedId === med.id ? (
                     <input
@@ -329,7 +336,8 @@ export function SettingsScreen() {
                         if (e.key === "Enter") saveMedEdit();
                       }}
                       autoFocus
-                      className="min-w-0 flex-1 rounded-lg bg-white px-2 py-1 text-[13px] font-bold text-[var(--ink)] outline-none"
+                      aria-label={t("medicationName")}
+                      className="min-w-0 flex-1 rounded-lg bg-[var(--surface)] px-2 py-2 text-[13px] font-bold text-[var(--ink)] outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--purple)]"
                     />
                   ) : (
                     <p className="min-w-0 flex-1 text-[13px] font-bold text-[var(--ink)]">
@@ -340,18 +348,20 @@ export function SettingsScreen() {
                     type="button"
                     disabled={!pillsEnabled}
                     onClick={() => openMedEdit(med.id, med.name)}
-                    className="flex items-center gap-1 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[#787878]"
+                    className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
+                    aria-label={`${t("edit")} ${med.name}`}
                   >
                     {t("edit")}
-                    <Icon name="edit" size={10} />
+                    <MaskIcon name="edit" size={12} />
                   </button>
                   <button
                     type="button"
                     disabled={!pillsEnabled}
                     onClick={() => removeMedication(med.id)}
                     aria-label={t("deleteMed", { name: med.name })}
+                    className="flex size-11 items-center justify-center rounded-full text-[var(--danger)] disabled:text-[var(--muted)]"
                   >
-                    <Icon name="x-circle" size={14} />
+                    <MaskIcon name="x-circle" size={16} />
                   </button>
                 </div>
               ))}
@@ -360,14 +370,14 @@ export function SettingsScreen() {
               type="button"
               disabled={!pillsEnabled}
               onClick={() => addMedication("morning")}
-              className="mt-4 text-[13px] font-extrabold text-[var(--coral-soft)] disabled:text-[#9f9f9f]"
+              className="mt-4 min-h-11 text-[13px] font-extrabold text-[var(--coral)] disabled:text-[var(--muted)]"
             >
               {t("addMedication")}
             </button>
           </section>
         ) : null}
 
-        <section className="mb-4 overflow-hidden rounded-[24px] border border-[var(--border)] bg-white px-4">
+        <section className="mb-4 overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--surface)] px-4">
           <SettingsRow
             label={t("dataStoredLocally")}
             trailing={
@@ -408,12 +418,10 @@ export function SettingsScreen() {
         <button
           type="button"
           onClick={handleReset}
-          className="mb-2 flex w-full items-center justify-center gap-3 py-4"
+          className="mb-2 flex min-h-11 w-full items-center justify-center gap-3 py-4 text-[var(--danger)]"
         >
-          <Icon name="trash" size={20} />
-          <span className="text-[16px] font-black text-[#e24a4a]">
-            {t("resetAllData")}
-          </span>
+          <MaskIcon name="trash" size={20} />
+          <span className="text-[16px] font-black">{t("resetAllData")}</span>
         </button>
       </div>
 

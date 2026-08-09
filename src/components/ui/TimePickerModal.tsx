@@ -61,7 +61,7 @@ export function TimePickerModal({
           <select
             value={hours}
             onChange={(e) => setHours(Number(e.target.value))}
-            className="h-12 w-20 rounded-2xl border border-[var(--border)] bg-[#fff8f6] text-center text-[20px] font-extrabold text-[var(--ink)] outline-none"
+            className="h-12 w-20 rounded-2xl border border-[var(--border)] bg-[var(--bg-peach)] text-center text-[20px] font-extrabold text-[var(--ink)] outline-none"
           >
             {Array.from({ length: 24 }, (_, i) => (
               <option key={i} value={i}>
@@ -80,7 +80,7 @@ export function TimePickerModal({
           <select
             value={minutes}
             onChange={(e) => setMinutes(Number(e.target.value))}
-            className="h-12 w-20 rounded-2xl border border-[var(--border)] bg-[#fff8f6] text-center text-[20px] font-extrabold text-[var(--ink)] outline-none"
+            className="h-12 w-20 rounded-2xl border border-[var(--border)] bg-[var(--bg-peach)] text-center text-[20px] font-extrabold text-[var(--ink)] outline-none"
           >
             {Array.from({ length: 60 }, (_, i) => (
               <option key={i} value={i}>

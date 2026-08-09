@@ -64,7 +64,7 @@ export function NumberInputModal({
         <span className="mb-2 block text-[12px] font-bold text-[var(--muted)]">
           {label}
         </span>
-        <div className="flex h-14 items-center gap-2 rounded-3xl border border-[var(--border)] bg-[#fff8f6] px-4">
+        <div className="flex h-14 items-center gap-2 rounded-3xl border border-[var(--border)] bg-[var(--bg-peach)] px-4">
           <input
             type="number"
             inputMode="numeric"

@@ -71,7 +71,7 @@ export function SupportModal({ open, onClose }: SupportModalProps) {
       onClick={onClose}
     >
       <div
-        className="max-h-[min(92%,720px)] w-full max-w-sm overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl animate-slide-up scrollbar-hide"
+        className="max-h-[min(92%,720px)] w-full max-w-sm overflow-y-auto rounded-[28px] bg-[var(--surface)] p-5 shadow-2xl animate-slide-up scrollbar-hide"
         onClick={(event) => event.stopPropagation()}
       >
         {step === "story" ? (
@@ -125,7 +125,7 @@ export function SupportModal({ open, onClose }: SupportModalProps) {
                     "rounded-full px-4 py-2 text-[14px] font-extrabold outline outline-1 outline-offset-[-1px] transition-colors",
                     draft === String(preset)
                       ? "bg-[var(--purple)] text-white outline-[var(--purple)]"
-                      : "bg-[#fff8f6] text-[var(--ink)] outline-[var(--border)]",
+                      : "bg-[var(--bg-peach)] text-[var(--ink)] outline-[var(--border)]",
                   ].join(" ")}
                 >
                   {formatEuro(preset)}
@@ -137,7 +137,7 @@ export function SupportModal({ open, onClose }: SupportModalProps) {
               <span className="mb-2 block text-[12px] font-bold text-[var(--muted)]">
                 {t("customAmountLabel")}
               </span>
-              <div className="flex h-14 items-center gap-2 rounded-3xl border border-[var(--border)] bg-[#fff8f6] px-4">
+              <div className="flex h-14 items-center gap-2 rounded-3xl border border-[var(--border)] bg-[var(--bg-peach)] px-4">
                 <span className="text-[18px] font-extrabold text-[var(--purple)]">
                   €
                 </span>

@@ -28,6 +28,7 @@ import {
 } from "@/lib/storage";
 import type {
   AppScreen,
+  AppTheme,
   CelebrationFlags,
   LanguageCode,
   Medication,
@@ -40,6 +41,12 @@ import type {
   WaterSettings,
 } from "@/types";
 
+const DASHBOARD_SCREENS = new Set<AppScreen>(["home", "about", "settings"]);
+
+export function isDashboardScreen(screen: AppScreen): boolean {
+  return DASHBOARD_SCREENS.has(screen);
+}
+
 interface AppContextValue {
   prefs: UserPreferences;
   screen: AppScreen;
@@ -48,6 +55,8 @@ interface AppContextValue {
   goToNextOnboarding: () => void;
   goToPreviousOnboarding: () => void;
   setLanguage: (language: LanguageCode) => void;
+  setTheme: (theme: AppTheme) => void;
+  toggleTheme: () => void;
   setName: (name: string) => void;
   setTrackingMode: (mode: TrackingMode) => void;
   updateWater: (partial: Partial<WaterSettings>) => void;
@@ -220,6 +229,20 @@ export function AppProvider({
     return () => window.clearInterval(id);
   }, [hydrated, demo]);
 
+  // Dark by default everywhere. Light only on home / about / settings
+  // when the user preference is light (persisted in prefs.theme).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const lightOnDashboard =
+      hydrated && isDashboardScreen(screen) && prefs.theme === "light";
+    document.documentElement.classList.toggle("dark", !lightOnDashboard);
+    try {
+      window.localStorage.setItem("sip-theme", prefs.theme);
+    } catch {
+      // ignore quota / private mode
+    }
+  }, [hydrated, prefs.theme, screen]);
+
   const updatePrefs = useCallback(
     (updater: (prev: UserPreferences) => UserPreferences) => {
       setPrefs((prev) => updater(prev));
@@ -266,6 +289,20 @@ export function AppProvider({
     },
     [updatePrefs]
   );
+
+  const setTheme = useCallback(
+    (theme: AppTheme) => {
+      updatePrefs((prev) => ({ ...prev, theme }));
+    },
+    [updatePrefs]
+  );
+
+  const toggleTheme = useCallback(() => {
+    updatePrefs((prev) => ({
+      ...prev,
+      theme: prev.theme === "dark" ? "light" : "dark",
+    }));
+  }, [updatePrefs]);
 
   const setName = useCallback(
     (name: string) => {
@@ -479,6 +516,7 @@ export function AppProvider({
     updatePrefs((prev) => ({
       ...prev,
       onboardingComplete: true,
+      theme: "dark",
       lastLogDate: todayKey(),
       // Lock Settings toggles to what was chosen in the first-setup reminders flow.
       notifications: notificationsFromSetup(
@@ -506,6 +544,8 @@ export function AppProvider({
       goToNextOnboarding,
       goToPreviousOnboarding,
       setLanguage,
+      setTheme,
+      toggleTheme,
       setName,
       setTrackingMode,
       updateWater,
@@ -531,6 +571,8 @@ export function AppProvider({
       goToNextOnboarding,
       goToPreviousOnboarding,
       setLanguage,
+      setTheme,
+      toggleTheme,
       setName,
       setTrackingMode,
       updateWater,

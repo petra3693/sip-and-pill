@@ -71,7 +71,7 @@ export function ContactSupportModal({
           rows={5}
           maxLength={2000}
           placeholder={t("yourMessagePlaceholder")}
-          className="w-full resize-none rounded-3xl border border-[var(--border)] bg-[#fff8f6] px-4 py-3 text-[15px] font-medium leading-5 text-[var(--ink)] outline-none placeholder:text-[var(--muted)]"
+          className="w-full resize-none rounded-3xl border border-[var(--border)] bg-[var(--bg-peach)] px-4 py-3 text-[15px] font-medium leading-5 text-[var(--ink)] outline-none placeholder:text-[var(--muted)]"
         />
       </label>
     </Modal>
