@@ -36,6 +36,7 @@ export const TRANSLATIONS = {
     notificationWaterBody: "Take a sip — stay on track with your water goal.",
     notificationPillTitle: "Medication reminder",
     notificationPillBody: "Time for your {name} dose.",
+    notificationPermissionDenied: "Notification permission was denied. Turn on notifications for Sip & Pill in your device Settings to receive reminders.",
     glassesCountOne: "{count} glass",
     glassesCountOther: "{count} glasses",
     pillsCountOne: "{count} pill",
@@ -112,20 +113,6 @@ export const TRANSLATIONS = {
     editDailyGoal: "Edit daily water goal",
     editGlassSize: "Edit glass size",
     dailyGoalMl: "Daily goal (ml)",
-    supportDeveloper: "Support Developer",
-    supportBlurb:
-      "This app is 100% free, offline, and ad-free. If it helps you, consider buying the developer a coffee.",
-    supportCharityBlurb:
-      "Sip & Pill is a charity-minded project — the developer earns nothing from it. It was built on their own time and expense to help others. If you appreciate that and want to support more projects like this, invite them for a coffee.",
-    inviteCoffee: "Invite me for a coffee",
-    giveAsYouLike: "Give as you see fit",
-    chooseAmount: "Choose an amount",
-    customAmountLabel: "Custom amount",
-    confirmDonation: "Confirm your support",
-    supportConfirmBlurb:
-      "You're about to donate {amount}. Thank you for helping keep independent projects like this going!",
-    donateAmount: "Donate {amount}",
-    thankYouSupport: "Thank you for supporting Sip & Pill!",
     whyBuilt: "Why we built this",
     whyBuiltBlurb:
       "We built Sip & Pill to help our friends and family manage their hydration and pill schedules simply and offline, without complex subscriptions or data tracking.",
@@ -193,6 +180,7 @@ export const TRANSLATIONS = {
     notificationWaterBody: "Igyál egy kortyot — tartsd a vízcélodat.",
     notificationPillTitle: "Gyógyszer-emlékeztető",
     notificationPillBody: "Ideje a(z) {name} adagnak.",
+    notificationPermissionDenied: "Az értesítési engedély meg lett tagadva. Kapcsold be a Sip & Pill értesítéseit a készülék Beállításokban, hogy megkapd az emlékeztetőket.",
     glassesCountOne: "{count} pohár",
     glassesCountOther: "{count} pohár",
     pillsCountOne: "{count} tabletta",
@@ -269,20 +257,6 @@ export const TRANSLATIONS = {
     editDailyGoal: "Napi vízcél szerkesztése",
     editGlassSize: "Pohárméret szerkesztése",
     dailyGoalMl: "Napi cél (ml)",
-    supportDeveloper: "Fejlesztő támogatása",
-    supportBlurb:
-      "Ez az app 100% ingyenes, offline és reklámmentes. Ha segít, hívj meg egy kávéra a fejlesztőt.",
-    supportCharityBlurb:
-      "A Sip & Pill egy charity jellegű projekt — ebből a fejlesztőnek nincs bevétele. Saját idejét és költségét téve bele készült, hogy másokon segítsen. Ha ezt értékeled, és támogatnád a hasonló projekteket, hívj meg egy kávéra.",
-    inviteCoffee: "Hívj meg egy kávéra",
-    giveAsYouLike: "Tegy belátásod szerint",
-    chooseAmount: "Válassz összeget",
-    customAmountLabel: "Egyéni összeg",
-    confirmDonation: "Támogatás megerősítése",
-    supportConfirmBlurb:
-      "{amount} adományozására készülsz. Köszönjük, hogy segítesz ilyen független projekteket életben tartani!",
-    donateAmount: "Adományozok {amount}",
-    thankYouSupport: "Köszönjük a Sip & Pill támogatását!",
     whyBuilt: "Miért készítettük",
     whyBuiltBlurb:
       "A Sip & Pill-t azért készítettük, hogy barátaink és családunk egyszerűen, offline követhesse a hidratálást és a gyógyszereket — előfizetés és adatkövetés nélkül.",
@@ -362,6 +336,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     notificationWaterBody: "Bebe un poco — sigue tu meta de agua.",
     notificationPillTitle: "Recordatorio de medicación",
     notificationPillBody: "Es hora de tu dosis de {name}.",
+    notificationPermissionDenied: "Se denegó el permiso de notificaciones. Actívalas para Sip & Pill en Ajustes del dispositivo para recibir recordatorios.",
     glassesCountOne: "{count} vaso",
     glassesCountOther: "{count} vasos",
     pillsCountOne: "{count} pastilla",
@@ -438,20 +413,6 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     editDailyGoal: "Editar meta diaria de agua",
     editGlassSize: "Editar tamaño del vaso",
     dailyGoalMl: "Meta diaria (ml)",
-    supportDeveloper: "Apoyar al desarrollador",
-    supportBlurb:
-      "Esta app es 100% gratis, offline y sin anuncios. Si te ayuda, invita a un café al desarrollador.",
-    supportCharityBlurb:
-      "Sip & Pill es un proyecto solidario: el desarrollador no gana nada con él. Lo creó con su propio tiempo y dinero para ayudar a otros. Si lo valoras y quieres apoyar proyectos así, invítale a un café.",
-    inviteCoffee: "Invítame a un café",
-    giveAsYouLike: "Da lo que te parezca",
-    chooseAmount: "Elige una cantidad",
-    customAmountLabel: "Cantidad personalizada",
-    confirmDonation: "Confirma tu apoyo",
-    supportConfirmBlurb:
-      "Vas a donar {amount}. ¡Gracias por ayudar a mantener proyectos independientes como este!",
-    donateAmount: "Donar {amount}",
-    thankYouSupport: "¡Gracias por apoyar Sip & Pill!",
     whyBuilt: "Por qué la creamos",
     whyBuiltBlurb:
       "Creamos Sip & Pill para que amigos y familia cuiden hidratación y pastillas de forma simple y offline, sin suscripciones ni seguimiento de datos.",
@@ -519,6 +480,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     notificationWaterBody: "Prenez une gorgée — restez sur votre objectif d'eau.",
     notificationPillTitle: "Rappel de médicament",
     notificationPillBody: "C'est l'heure de votre dose de {name}.",
+    notificationPermissionDenied: "L'autorisation de notification a été refusée. Activez les notifications pour Sip & Pill dans Réglages pour recevoir les rappels.",
     glassesCountOne: "{count} verre",
     glassesCountOther: "{count} verres",
     pillsCountOne: "{count} comprimé",
@@ -595,20 +557,6 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     editDailyGoal: "Modifier l'objectif d'eau",
     editGlassSize: "Modifier la taille du verre",
     dailyGoalMl: "Objectif quotidien (ml)",
-    supportDeveloper: "Soutenir le développeur",
-    supportBlurb:
-      "Cette app est 100% gratuite, hors ligne et sans pub. Si elle vous aide, offrez un café au développeur.",
-    supportCharityBlurb:
-      "Sip & Pill est un projet à but solidaire : le développeur n'en tire aucun revenu. Il l'a créé sur son temps et ses deniers pour aider les autres. Si cela vous touche et que vous voulez soutenir de tels projets, offrez-lui un café.",
-    inviteCoffee: "Offrez-moi un café",
-    giveAsYouLike: "Donnez selon votre cœur",
-    chooseAmount: "Choisissez un montant",
-    customAmountLabel: "Montant personnalisé",
-    confirmDonation: "Confirmer votre soutien",
-    supportConfirmBlurb:
-      "Vous allez donner {amount}. Merci d'aider à faire vivre des projets indépendants comme celui-ci !",
-    donateAmount: "Donner {amount}",
-    thankYouSupport: "Merci de soutenir Sip & Pill !",
     whyBuilt: "Pourquoi nous l'avons créée",
     whyBuiltBlurb:
       "Nous avons créé Sip & Pill pour aider proches et famille à gérer hydratation et médicaments simplement, hors ligne, sans abonnement ni suivi de données.",
@@ -676,6 +624,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     notificationWaterBody: "Nimm einen Schluck — bleib bei deinem Wasserziel.",
     notificationPillTitle: "Medikamentenerinnerung",
     notificationPillBody: "Zeit für deine {name}-Dosis.",
+    notificationPermissionDenied: "Die Benachrichtigungsberechtigung wurde verweigert. Aktiviere Mitteilungen für Sip & Pill in den Geräteeinstellungen, um Erinnerungen zu erhalten.",
     glassesCountOne: "{count} Glas",
     glassesCountOther: "{count} Gläser",
     pillsCountOne: "{count} Tablette",
@@ -752,20 +701,6 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     editDailyGoal: "Tagesziel bearbeiten",
     editGlassSize: "Glasgröße bearbeiten",
     dailyGoalMl: "Tagesziel (ml)",
-    supportDeveloper: "Entwickler unterstützen",
-    supportBlurb:
-      "Diese App ist 100% kostenlos, offline und werbefrei. Wenn sie hilft, lade den Entwickler auf einen Kaffee ein.",
-    supportCharityBlurb:
-      "Sip & Pill ist ein wohltätiges Projekt — der Entwickler verdient nichts damit. Es entstand aus eigener Zeit und Kosten, um anderen zu helfen. Wenn dir das etwas bedeutet und du ähnliche Projekte unterstützen möchtest, lade ihn auf einen Kaffee ein.",
-    inviteCoffee: "Lad mich auf einen Kaffee ein",
-    giveAsYouLike: "Gib, was dir richtig erscheint",
-    chooseAmount: "Betrag wählen",
-    customAmountLabel: "Eigener Betrag",
-    confirmDonation: "Unterstützung bestätigen",
-    supportConfirmBlurb:
-      "Du spendest gleich {amount}. Danke, dass du unabhängige Projekte wie dieses mitträgst!",
-    donateAmount: "{amount} spenden",
-    thankYouSupport: "Danke für deine Unterstützung von Sip & Pill!",
     whyBuilt: "Warum wir das gebaut haben",
     whyBuiltBlurb:
       "Wir haben Sip & Pill gebaut, damit Freunde und Familie Flüssigkeitszufuhr und Medikamente einfach und offline verwalten — ohne Abos oder Datenerfassung.",
@@ -833,6 +768,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     notificationWaterBody: "Bevi un sorso — resta sul tuo obiettivo d'acqua.",
     notificationPillTitle: "Promemoria farmaci",
     notificationPillBody: "È ora della dose di {name}.",
+    notificationPermissionDenied: "L'autorizzazione alle notifiche è stata negata. Attiva le notifiche per Sip & Pill nelle Impostazioni del dispositivo per ricevere i promemoria.",
     glassesCountOne: "{count} bicchiere",
     glassesCountOther: "{count} bicchieri",
     pillsCountOne: "{count} pillola",
@@ -909,20 +845,6 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     editDailyGoal: "Modifica obiettivo acqua",
     editGlassSize: "Modifica capacità bicchiere",
     dailyGoalMl: "Obiettivo giornaliero (ml)",
-    supportDeveloper: "Sostieni lo sviluppatore",
-    supportBlurb:
-      "Questa app è 100% gratis, offline e senza pubblicità. Se ti aiuta, invita lo sviluppatore a un caffè.",
-    supportCharityBlurb:
-      "Sip & Pill è un progetto solidale: lo sviluppatore non ne ricava nulla. È stato creato con tempo e spese proprie per aiutare gli altri. Se lo apprezzi e vuoi sostenere progetti simili, invitalo a un caffè.",
-    inviteCoffee: "Invitami a un caffè",
-    giveAsYouLike: "Dona come preferisci",
-    chooseAmount: "Scegli un importo",
-    customAmountLabel: "Importo personalizzato",
-    confirmDonation: "Conferma il supporto",
-    supportConfirmBlurb:
-      "Stai per donare {amount}. Grazie per aiutare a sostenere progetti indipendenti come questo!",
-    donateAmount: "Dona {amount}",
-    thankYouSupport: "Grazie per sostenere Sip & Pill!",
     whyBuilt: "Perché l'abbiamo creata",
     whyBuiltBlurb:
       "Abbiamo creato Sip & Pill per aiutare amici e famiglia a gestire idratazione e medicine in modo semplice e offline, senza abbonamenti né tracciamento dati.",
@@ -990,6 +912,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     notificationWaterBody: "Bebe um gole — mantém a tua meta de água.",
     notificationPillTitle: "Lembrete de medicação",
     notificationPillBody: "É hora da tua dose de {name}.",
+    notificationPermissionDenied: "A permissão de notificações foi negada. Ativa as notificações do Sip & Pill nas Definições do dispositivo para receber lembretes.",
     glassesCountOne: "{count} copo",
     glassesCountOther: "{count} copos",
     pillsCountOne: "{count} comprimido",
@@ -1066,20 +989,6 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     editDailyGoal: "Editar meta diária de água",
     editGlassSize: "Editar tamanho do copo",
     dailyGoalMl: "Meta diária (ml)",
-    supportDeveloper: "Apoiar o programador",
-    supportBlurb:
-      "Esta app é 100% grátis, offline e sem anúncios. Se te ajuda, convida o programador a um café.",
-    supportCharityBlurb:
-      "O Sip & Pill é um projeto solidário — o programador não ganha nada com isto. Foi feito com tempo e custos próprios para ajudar outros. Se valorizas isso e queres apoiar projetos semelhantes, convida-o a um café.",
-    inviteCoffee: "Convida-me a um café",
-    giveAsYouLike: "Dá como achares certo",
-    chooseAmount: "Escolhe um valor",
-    customAmountLabel: "Valor personalizado",
-    confirmDonation: "Confirmar o apoio",
-    supportConfirmBlurb:
-      "Estás prestes a doar {amount}. Obrigado por ajudares a manter projetos independentes como este!",
-    donateAmount: "Doar {amount}",
-    thankYouSupport: "Obrigado por apoiares o Sip & Pill!",
     whyBuilt: "Porque criámos isto",
     whyBuiltBlurb:
       "Criámos o Sip & Pill para ajudar amigos e família a gerir hidratação e medicamentos de forma simples e offline, sem subscrições nem rastreio de dados.",
@@ -1147,6 +1056,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     notificationWaterBody: "ひと口飲んで、水分目標を続けましょう。",
     notificationPillTitle: "お薬のリマインダー",
     notificationPillBody: "{name} の時間です。",
+    notificationPermissionDenied: "通知の許可が拒否されました。リマインダーを受け取るには、端末の設定で Sip & Pill の通知をオンにしてください。",
     glassesCountOne: "{count} 杯",
     glassesCountOther: "{count} 杯",
     pillsCountOne: "{count} 錠",
@@ -1223,20 +1133,6 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     editDailyGoal: "水分目標を編集",
     editGlassSize: "コップサイズを編集",
     dailyGoalMl: "1日の目標（ml）",
-    supportDeveloper: "開発を支援する",
-    supportBlurb:
-      "このアプリは100%無料・オフライン・広告なしです。役に立ったら、開発者にコーヒーをごちそうしませんか。",
-    supportCharityBlurb:
-      "Sip & Pillはチャリティ精神のプロジェクトで、開発者に収益はありません。自分の時間と費用で、誰かの助けになるよう作りました。もし共感してくれて、似たプロジェクトを応援したいなら、コーヒーをごちそうしてください。",
-    inviteCoffee: "コーヒーをごちそうする",
-    giveAsYouLike: "気持ちで支援する",
-    chooseAmount: "金額を選ぶ",
-    customAmountLabel: "任意の金額",
-    confirmDonation: "支援を確認",
-    supportConfirmBlurb:
-      "{amount} を寄付しようとしています。このような独立したプロジェクトを支えてくれてありがとう！",
-    donateAmount: "{amount} を寄付する",
-    thankYouSupport: "Sip & Pillへのご支援ありがとうございます！",
     whyBuilt: "つくった理由",
     whyBuiltBlurb:
       "友人や家族が、サブスクやデータ追跡なしで、シンプルにオフラインで水分とお薬を管理できるように Sip & Pill をつくりました。",
@@ -1304,6 +1200,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     notificationWaterBody: "한 모금 마시며 물 목표를 이어가세요.",
     notificationPillTitle: "약 복용 알림",
     notificationPillBody: "{name} 복용 시간입니다.",
+    notificationPermissionDenied: "알림 권한이 거부되었습니다. 리마인더를 받으려면 기기 설정에서 Sip & Pill 알림을 켜 주세요.",
     glassesCountOne: "{count} 잔",
     glassesCountOther: "{count} 잔",
     pillsCountOne: "{count} 알",
@@ -1380,20 +1277,6 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     editDailyGoal: "일일 물 목표 편집",
     editGlassSize: "잔 크기 편집",
     dailyGoalMl: "일일 목표 (ml)",
-    supportDeveloper: "개발자 후원",
-    supportBlurb:
-      "이 앱은 100% 무료, 오프라인, 광고 없음입니다. 도움이 되었다면 개발자에게 커피 한 잔을 사 주세요.",
-    supportCharityBlurb:
-      "Sip & Pill은 자선 성격의 프로젝트로, 개발자에게 수익이 없습니다. 다른 사람을 돕기 위해 자신의 시간과 비용으로 만들었습니다. 그 마음이 마음에 들고 비슷한 프로젝트를 응원하고 싶다면, 커피 한 잔으로 초대해 주세요.",
-    inviteCoffee: "커피 한 잔 사 주기",
-    giveAsYouLike: "마음 가는 대로 주기",
-    chooseAmount: "금액 선택",
-    customAmountLabel: "직접 입력",
-    confirmDonation: "후원 확인",
-    supportConfirmBlurb:
-      "{amount}을(를) 후원하려고 합니다. 이런 독립 프로젝트를 이어가게 도와주셔서 감사합니다!",
-    donateAmount: "{amount} 후원하기",
-    thankYouSupport: "Sip & Pill을 후원해 주셔서 감사합니다!",
     whyBuilt: "만든 이유",
     whyBuiltBlurb:
       "친구와 가족이 구독이나 데이터 추적 없이, 간단하고 오프라인으로 수분과 약을 관리하도록 Sip & Pill을 만들었습니다.",

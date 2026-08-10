@@ -152,7 +152,6 @@ export function SettingsScreen() {
           : "";
 
   const openMedEdit = (id: string, name: string) => {
-    if (!pillsEnabled) return;
     setEditingMedId(id);
     setMedDraft(name);
   };
@@ -329,9 +328,8 @@ export function SettingsScreen() {
                 </div>
                 <button
                   type="button"
-                  disabled={!waterEnabled}
                   onClick={() => setEditingGoal(true)}
-                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
+                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)]"
                   aria-label={t("editDailyGoal")}
                 >
                   {t("edit")}
@@ -354,9 +352,8 @@ export function SettingsScreen() {
                 </div>
                 <button
                   type="button"
-                  disabled={!waterEnabled}
                   onClick={() => setEditingGlass(true)}
-                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
+                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)]"
                   aria-label={t("editGlassSize")}
                 >
                   {t("edit")}
@@ -377,13 +374,12 @@ export function SettingsScreen() {
                 </div>
                 <button
                   type="button"
-                  disabled={!waterEnabled}
                   onClick={() =>
                     setVolumeUnit(
                       prefs.volumeUnit === "ml" ? "fl_oz" : "ml",
                     )
                   }
-                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
+                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)]"
                   aria-label={t("volumeUnit")}
                 >
                   {t("edit")}
@@ -424,9 +420,8 @@ export function SettingsScreen() {
                   )}
                   <button
                     type="button"
-                    disabled={!pillsEnabled}
                     onClick={() => openMedEdit(med.id, med.name)}
-                    className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
+                    className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 text-[12px] font-extrabold text-[var(--purple)]"
                     aria-label={`${t("edit")} ${med.name}`}
                   >
                     {t("edit")}
@@ -434,10 +429,9 @@ export function SettingsScreen() {
                   </button>
                   <button
                     type="button"
-                    disabled={!pillsEnabled}
                     onClick={() => removeMedication(med.id)}
                     aria-label={t("deleteMed", { name: med.name })}
-                    className="flex size-11 items-center justify-center rounded-full text-[var(--danger)] disabled:text-[var(--muted)]"
+                    className="flex size-11 items-center justify-center rounded-full text-[var(--danger)]"
                   >
                     <MaskIcon name="x-circle" size={16} />
                   </button>
@@ -446,9 +440,8 @@ export function SettingsScreen() {
             </div>
             <button
               type="button"
-              disabled={!pillsEnabled}
               onClick={() => addMedication("morning")}
-              className="mt-4 min-h-11 text-[13px] font-extrabold text-[var(--coral)] disabled:text-[var(--muted)]"
+              className="mt-4 min-h-11 text-[13px] font-extrabold text-[var(--coral)]"
             >
               {t("addMedication")}
             </button>

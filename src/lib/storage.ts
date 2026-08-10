@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { Preferences } from "@capacitor/preferences";
 import {
   DEFAULT_PREFERENCES,
@@ -63,47 +64,69 @@ export function resetDailyProgress(prefs: UserPreferences): UserPreferences {
   };
 }
 
-export function loadPreferences(): UserPreferences {
+function parsePreferencesRaw(raw: string): UserPreferences {
+  const parsed = JSON.parse(raw) as Partial<UserPreferences>;
+  const merged: UserPreferences = {
+    ...DEFAULT_PREFERENCES,
+    ...parsed,
+    language: normalizeLanguage(parsed.language),
+    theme: normalizeTheme(parsed.theme),
+    medicalDisclaimerAccepted: Boolean(parsed.medicalDisclaimerAccepted),
+    volumeUnit: parsed.volumeUnit === "fl_oz" ? "fl_oz" : "ml",
+    water: normalizeWaterSettings({
+      ...DEFAULT_PREFERENCES.water,
+      ...parsed.water,
+    }),
+    reminders: {
+      ...DEFAULT_PREFERENCES.reminders,
+      ...parsed.reminders,
+      times: parsed.reminders?.times ?? DEFAULT_PREFERENCES.reminders.times,
+    },
+    notifications: {
+      ...DEFAULT_PREFERENCES.notifications,
+      ...parsed.notifications,
+    },
+    medications: parsed.medications ?? DEFAULT_PREFERENCES.medications,
+    celebrations: {
+      ...DEFAULT_PREFERENCES.celebrations,
+      ...parsed.celebrations,
+    },
+  };
+  return resetDailyProgress(merged);
+}
+
+/**
+ * Load prefs: localStorage first; on native, fall back to Capacitor Preferences
+ * and re-hydrate localStorage when recovering from the native mirror.
+ */
+export async function loadPreferences(): Promise<UserPreferences> {
   if (typeof window === "undefined") {
     return DEFAULT_PREFERENCES;
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return DEFAULT_PREFERENCES;
+    const localRaw = window.localStorage.getItem(STORAGE_KEY);
+    if (localRaw) {
+      return parsePreferencesRaw(localRaw);
     }
 
-    const parsed = JSON.parse(raw) as Partial<UserPreferences>;
-    const merged: UserPreferences = {
-      ...DEFAULT_PREFERENCES,
-      ...parsed,
-      language: normalizeLanguage(parsed.language),
-      theme: normalizeTheme(parsed.theme),
-      medicalDisclaimerAccepted: Boolean(parsed.medicalDisclaimerAccepted),
-      volumeUnit: parsed.volumeUnit === "fl_oz" ? "fl_oz" : "ml",
-      water: normalizeWaterSettings({
-        ...DEFAULT_PREFERENCES.water,
-        ...parsed.water,
-      }),
-      reminders: {
-        ...DEFAULT_PREFERENCES.reminders,
-        ...parsed.reminders,
-        times:
-          parsed.reminders?.times ?? DEFAULT_PREFERENCES.reminders.times,
-      },
-      notifications: {
-        ...DEFAULT_PREFERENCES.notifications,
-        ...parsed.notifications,
-      },
-      medications: parsed.medications ?? DEFAULT_PREFERENCES.medications,
-      celebrations: {
-        ...DEFAULT_PREFERENCES.celebrations,
-        ...parsed.celebrations,
-      },
-    };
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { value } = await Preferences.get({ key: STORAGE_KEY });
+        if (value) {
+          try {
+            window.localStorage.setItem(STORAGE_KEY, value);
+          } catch {
+            // private mode — still return parsed prefs
+          }
+          return parsePreferencesRaw(value);
+        }
+      } catch {
+        // Preferences unavailable
+      }
+    }
 
-    return resetDailyProgress(merged);
+    return DEFAULT_PREFERENCES;
   } catch {
     return DEFAULT_PREFERENCES;
   }

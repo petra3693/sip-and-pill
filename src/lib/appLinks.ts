@@ -1,4 +1,4 @@
-/** Marketing site. */
+/** Marketing site — live production landing (confirmed reachable). */
 export const WEBSITE_URL = "https://www.sip-and-pill.app/";
 
 /** Public share URL used from Settings. */

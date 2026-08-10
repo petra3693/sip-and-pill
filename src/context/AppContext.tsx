@@ -212,11 +212,18 @@ export function AppProvider({
       setHydrated(true);
       return;
     }
-    const loaded = loadPreferences();
-    setPrefs(loaded);
-    // Always open on splash; Get Started routes to home if already set up.
-    setScreen("splash");
-    setHydrated(true);
+    let cancelled = false;
+    void (async () => {
+      const loaded = await loadPreferences();
+      if (cancelled) return;
+      setPrefs(loaded);
+      // Always open on splash; Get Started routes to home if already set up.
+      setScreen("splash");
+      setHydrated(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [demo, persist]);
 
   // Existing installs that never saw the medical disclaimer must accept it once.
@@ -535,33 +542,68 @@ export function AppProvider({
       void (async () => {
         const enabling =
           partial.waterReminders === true || partial.pillAlarms === true;
-        // Never prompt on cold launch — only when the user turns a reminder ON.
+
+        let permissionDenied = false;
         if (enabling) {
-          await ensureNotificationPermission();
+          // Never prompt on cold launch — only when the user turns a reminder ON.
+          const granted = await ensureNotificationPermission();
+          if (!granted) {
+            permissionDenied = true;
+          }
         }
 
         const holder: { current: UserPreferences | null } = { current: null };
         updatePrefs((prev) => {
+          const nextNotifications = {
+            ...prev.notifications,
+            ...partial,
+          };
+          // Keep enabling flags off if OS permission was denied.
+          if (permissionDenied) {
+            if (partial.waterReminders === true) {
+              nextNotifications.waterReminders = false;
+            }
+            if (partial.pillAlarms === true) {
+              nextNotifications.pillAlarms = false;
+            }
+          }
           holder.current = {
             ...prev,
-            notifications: { ...prev.notifications, ...partial },
+            notifications: nextNotifications,
           };
           return holder.current;
         });
 
-        // Allow React to commit, then sync native schedules from the merged prefs.
+        if (permissionDenied) {
+          const lang = holder.current?.language ?? "en";
+          window.alert(translate(lang, "notificationPermissionDenied"));
+          return;
+        }
+
         await Promise.resolve();
         if (holder.current) {
           await syncLocalNotifications(holder.current, {
-            waterTitle: translate(holder.current.language, "notificationWaterTitle"),
-            waterBody: translate(holder.current.language, "notificationWaterBody"),
-            pillTitle: translate(holder.current.language, "notificationPillTitle"),
-            pillBody: translate(holder.current.language, "notificationPillBody"),
+            waterTitle: translate(
+              holder.current.language,
+              "notificationWaterTitle",
+            ),
+            waterBody: translate(
+              holder.current.language,
+              "notificationWaterBody",
+            ),
+            pillTitle: translate(
+              holder.current.language,
+              "notificationPillTitle",
+            ),
+            pillBody: translate(
+              holder.current.language,
+              "notificationPillBody",
+            ),
           });
         }
       })();
     },
-    [updatePrefs]
+    [updatePrefs],
   );
 
   const markCelebrationShown = useCallback(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Icon, MaskIcon, MascotImage } from "@/components/ui/Icon";
 import { ScreenShell } from "@/components/ui/ScreenShell";
@@ -53,14 +53,20 @@ export function MedicationsScreen() {
     [timesPerDay],
   );
 
-  // Each visible slot starts with one default "New medication" field.
+  // Seed each slot once when it first becomes visible — never re-create after delete.
+  const seededSlotsRef = useRef<Set<MedTimeSlot>>(new Set());
+
   useEffect(() => {
     for (const slot of visibleSlots) {
+      if (seededSlotsRef.current.has(slot)) continue;
+      seededSlotsRef.current.add(slot);
       if (!prefs.medications.some((med) => med.timeSlot === slot)) {
         addMedication(slot);
       }
     }
-  }, [visibleSlots, prefs.medications, addMedication]);
+    // Intentionally omit prefs.medications: re-running on med deletes would reseed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seed only when slots appear
+  }, [visibleSlots, addMedication]);
 
   const handleContinue = () => {
     syncMedReminders(timesPerDay);
