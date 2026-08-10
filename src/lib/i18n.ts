@@ -126,6 +126,7 @@ export const TRANSLATIONS = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Check out Sip & Pill — a free, offline water & medication companion!",
+    shareAppCopied: "Link copied to clipboard.",
     rateAppThanks: "Thanks! Your feedback helps others find Sip & Pill.",
     privacyPolicyBody:
       "Sip & Pill stores your name, water goals, medications, and logs only on this device. Nothing is uploaded to a server. You can erase everything anytime with Reset All Data.",
@@ -264,6 +265,7 @@ export const TRANSLATIONS = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Nézd meg a Sip & Pill-t — ingyenes, offline víz- és gyógyszerkísérő!",
+    shareAppCopied: "A link a vágólapra került.",
     rateAppThanks: "Köszi! A visszajelzésed segít, hogy mások is megtalálják.",
     privacyPolicyBody:
       "A Sip & Pill a neved, vízcéljaid, gyógyszereid és naplóid csak ezen az eszközön tárolja. Semmi sem kerül szerverre. Bármikor mindent törölhetsz a „Minden adat törlése” gombbal.",
@@ -414,6 +416,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Prueba Sip & Pill: compañero gratis y offline de agua y medicamentos.",
+    shareAppCopied: "Enlace copiado al portapapeles.",
     rateAppThanks: "¡Gracias! Tu opinión ayuda a que otros encuentren Sip & Pill.",
     privacyPolicyBody:
       "Sip & Pill guarda tu nombre, metas de agua, medicamentos y registros solo en este dispositivo. Nada se sube a un servidor. Puedes borrar todo con Restablecer datos.",
@@ -552,6 +555,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Découvrez Sip & Pill — compagnon gratuit et hors ligne pour l'eau et les médicaments !",
+    shareAppCopied: "Lien copié dans le presse-papiers.",
     rateAppThanks: "Merci ! Votre avis aide les autres à trouver Sip & Pill.",
     privacyPolicyBody:
       "Sip & Pill stocke votre nom, objectifs d'eau, médicaments et journaux uniquement sur cet appareil. Rien n'est envoyé sur un serveur. Vous pouvez tout effacer via Réinitialiser.",
@@ -690,6 +694,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Probier Sip & Pill — kostenloser Offline-Begleiter für Wasser & Medikamente!",
+    shareAppCopied: "Link in die Zwischenablage kopiert.",
     rateAppThanks: "Danke! Dein Feedback hilft anderen, Sip & Pill zu finden.",
     privacyPolicyBody:
       "Sip & Pill speichert Name, Wasserziele, Medikamente und Protokolle nur auf diesem Gerät. Nichts wird auf einen Server geladen. Alles lässt sich über Daten zurücksetzen löschen.",
@@ -828,6 +833,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Prova Sip & Pill — compagno gratuito e offline per acqua e farmaci!",
+    shareAppCopied: "Link copiato negli appunti.",
     rateAppThanks: "Grazie! Il tuo feedback aiuta altri a trovare Sip & Pill.",
     privacyPolicyBody:
       "Sip & Pill conserva nome, obiettivi acqua, farmaci e registri solo su questo dispositivo. Nulla viene caricato su un server. Puoi cancellare tutto con Reimposta dati.",
@@ -966,6 +972,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Experimenta o Sip & Pill — companheiro grátis e offline de água e medicamentos!",
+    shareAppCopied: "Ligação copiada para a área de transferência.",
     rateAppThanks: "Obrigado! A tua opinião ajuda outros a encontrar o Sip & Pill.",
     privacyPolicyBody:
       "O Sip & Pill guarda o nome, metas de água, medicamentos e registos só neste dispositivo. Nada é enviado para um servidor. Podes apagar tudo em Repor dados.",
@@ -1104,6 +1111,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Sip & Pillをチェック — 無料・オフラインの水分＆お薬コンパニオン！",
+    shareAppCopied: "リンクをコピーしました。",
     rateAppThanks: "ありがとう！フィードバックが他の人の発見につながります。",
     privacyPolicyBody:
       "Sip & Pillは名前・水分目標・お薬・記録をこの端末だけに保存します。サーバーには送りません。「すべてのデータをリセット」でいつでも消去できます。",
@@ -1242,6 +1250,7 @@ const LOCALES: Record<LanguageCode, Dictionary> = {
     shareAppTitle: "Sip & Pill",
     shareAppMessage:
       "Sip & Pill을 확인해 보세요 — 무료 오프라인 수분·약 동반자!",
+    shareAppCopied: "링크가 복사되었습니다.",
     rateAppThanks: "감사합니다! 피드백이 다른 사람들에게도 도움이 됩니다.",
     privacyPolicyBody:
       "Sip & Pill은 이름, 물 목표, 약, 기록을 이 기기에만 저장합니다. 서버로 업로드하지 않습니다. 모든 데이터 초기화로 언제든 삭제할 수 있습니다.",

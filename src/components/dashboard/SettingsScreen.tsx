@@ -21,6 +21,8 @@ import {
   MAX_WATER_ML,
   MIN_WATER_ML,
 } from "@/lib/constants";
+import { getPrivacyPolicy, getTermsOfUse } from "@/lib/legal";
+import { requestAppReview, shareApp } from "@/lib/platformActions";
 import type { TranslationKey } from "@/lib/i18n";
 import type { LanguageCode } from "@/types";
 
@@ -106,27 +108,20 @@ export function SettingsScreen() {
   };
 
   const handleShareApp = async () => {
-    const payload = {
+    const result = await shareApp({
       title: t("shareAppTitle"),
       text: t("shareAppMessage"),
       url: APP_SHARE_URL,
-    };
-    try {
-      if (typeof navigator !== "undefined" && navigator.share) {
-        await navigator.share(payload);
-        return;
-      }
-    } catch {
-      // User cancelled share sheet — ignore.
-      return;
+    });
+    if (result === "copied") {
+      window.alert(t("shareAppCopied"));
     }
-    try {
-      await navigator.clipboard?.writeText(
-        `${payload.text}\n${payload.url}`,
-      );
-      window.alert(t("shareAppMessage"));
-    } catch {
-      window.alert(`${payload.text}\n${payload.url}`);
+  };
+
+  const handleRateApp = async () => {
+    const result = await requestAppReview();
+    if (result === "unavailable") {
+      setInfoModal("rate");
     }
   };
 
@@ -141,9 +136,9 @@ export function SettingsScreen() {
 
   const infoBody =
     infoModal === "privacy"
-      ? t("privacyPolicyBody")
+      ? getPrivacyPolicy(prefs.language)
       : infoModal === "terms"
-        ? t("termsOfUseBody")
+        ? getTermsOfUse(prefs.language)
         : infoModal === "rate"
           ? t("rateAppThanks")
           : "";
@@ -427,10 +422,13 @@ export function SettingsScreen() {
           <div className="h-px bg-[var(--border)]" />
           <SettingsRow
             label={t("rateApp")}
-            onClick={() => setInfoModal("rate")}
+            onClick={() => void handleRateApp()}
           />
           <div className="h-px bg-[var(--border)]" />
-          <SettingsRow label={t("shareApp")} onClick={handleShareApp} />
+          <SettingsRow
+            label={t("shareApp")}
+            onClick={() => void handleShareApp()}
+          />
           <div className="h-px bg-[var(--border)]" />
           <SettingsRow
             label={t("privacyPolicy")}
@@ -478,7 +476,7 @@ export function SettingsScreen() {
           <Button onClick={() => setInfoModal(null)}>{t("close")}</Button>
         }
       >
-        <p className="text-[14px] font-medium leading-5 text-[var(--muted)]">
+        <p className="whitespace-pre-wrap text-[13px] font-medium leading-5 text-[var(--muted)]">
           {infoBody}
         </p>
       </Modal>

@@ -83,10 +83,10 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="w-full max-w-sm rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-xl animate-slide-up outline-none"
+        className="flex max-h-[min(70vh,560px)] w-full max-w-sm flex-col rounded-[24px] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-xl animate-slide-up outline-none"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
           <h2 className="text-[18px] font-extrabold text-[var(--ink)]">
             {title}
           </h2>
@@ -99,8 +99,10 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
             ✕
           </button>
         </div>
-        {children}
-        {footer ? <div className="mt-5">{footer}</div> : null}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {children}
+        </div>
+        {footer ? <div className="mt-5 shrink-0">{footer}</div> : null}
       </div>
     </div>
   );
