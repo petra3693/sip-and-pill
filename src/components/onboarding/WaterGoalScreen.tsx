@@ -12,7 +12,9 @@ import {
   MAX_WATER_ML,
   MIN_WATER_ML,
 } from "@/lib/constants";
+import { selectPlural } from "@/lib/format";
 import { ONBOARDING_PROGRESS } from "@/lib/screens";
+import { formatVolume, roundMl } from "@/lib/volume";
 
 export function WaterGoalScreen() {
   const { prefs, updateWater, goToNextOnboarding } = useApp();
@@ -24,13 +26,13 @@ export function WaterGoalScreen() {
 
   const adjustGlasses = (delta: number) => {
     const nextGlasses = Math.min(maxGlasses, Math.max(minGlasses, glasses + delta));
-    updateWater({ dailyGoalMl: nextGlasses * glassSizeMl });
+    updateWater({ dailyGoalMl: roundMl(nextGlasses * glassSizeMl) });
   };
 
   const setGlassSize = (size: number) => {
     updateWater({
       glassSizeMl: size,
-      dailyGoalMl: glasses * size,
+      dailyGoalMl: roundMl(glasses * size),
     });
   };
 
@@ -53,9 +55,14 @@ export function WaterGoalScreen() {
             />
           </div>
           <p className="mt-1 text-[32px] font-extrabold leading-none">
-            {dailyGoalMl.toLocaleString()}
+            {formatVolume(dailyGoalMl, prefs.volumeUnit, prefs.language).replace(
+              / (ml|fl oz)$/i,
+              "",
+            )}
           </p>
-          <p className="mt-1 text-[12px] font-bold">{t("mlPerDay")}</p>
+          <p className="mt-1 text-[12px] font-bold">
+            {prefs.volumeUnit === "fl_oz" ? t("volumeUnitFlOz") : t("mlPerDay")}
+          </p>
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-4">
@@ -69,11 +76,13 @@ export function WaterGoalScreen() {
           </button>
           <div className="min-w-[100px] text-center">
             <p className="text-[16px] font-extrabold">
-              {glasses} {t("glasses")}
+              {selectPlural(prefs.language, glasses, {
+                one: t("glassesCountOne", { count: glasses }),
+                other: t("glassesCountOther", { count: glasses }),
+              })}
             </p>
             <p className="text-[12px] font-bold">
-              {glassSizeMl}
-              {t("mlEach")}
+              {formatVolume(glassSizeMl, prefs.volumeUnit, prefs.language)}
             </p>
           </div>
           <button
@@ -106,7 +115,7 @@ export function WaterGoalScreen() {
                     : "border border-[var(--border)] bg-[var(--surface)] text-[var(--ink)]",
                 ].join(" ")}
               >
-                {size}ml
+                {formatVolume(size, prefs.volumeUnit, prefs.language)}
               </button>
             );
           })}

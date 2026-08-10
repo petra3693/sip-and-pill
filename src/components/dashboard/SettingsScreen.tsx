@@ -13,7 +13,7 @@ import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { useApp } from "@/context/AppContext";
 import { useDashboardChrome } from "@/hooks/useDashboardChrome";
 import { useT } from "@/hooks/useT";
-import { APP_SHARE_URL } from "@/lib/appLinks";
+import { APP_SHARE_URL, PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "@/lib/appLinks";
 import {
   glassesFromGoal,
   GLASS_SIZE_OPTIONS,
@@ -21,8 +21,11 @@ import {
   MAX_WATER_ML,
   MIN_WATER_ML,
 } from "@/lib/constants";
+import { selectPlural } from "@/lib/format";
 import { getPrivacyPolicy, getTermsOfUse } from "@/lib/legal";
 import { requestAppReview, shareApp } from "@/lib/platformActions";
+import { formatVolume } from "@/lib/volume";
+import { MedicalDisclaimer } from "@/components/ui/MedicalDisclaimer";
 import type { TranslationKey } from "@/lib/i18n";
 import type { LanguageCode } from "@/types";
 
@@ -74,6 +77,7 @@ export function SettingsScreen() {
     setLanguage,
     setTheme,
     setName,
+    setVolumeUnit,
     updateNotifications,
     updateWater,
     updateMedication,
@@ -99,6 +103,10 @@ export function SettingsScreen() {
 
   const waterEnabled = prefs.notifications.waterReminders;
   const pillsEnabled = prefs.notifications.pillAlarms;
+
+  const handleOpenExternal = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   const handleReset = () => {
     const confirmed = window.confirm(t("resetConfirm"));
@@ -306,8 +314,17 @@ export function SettingsScreen() {
                     {t("dailyTarget")}
                   </p>
                   <p className="text-[14px] font-bold text-[var(--ink)]">
-                    {prefs.water.dailyGoalMl.toLocaleString()} ml (
-                    {t("glassesCount", { count: maxGlasses })})
+                    {formatVolume(
+                      prefs.water.dailyGoalMl,
+                      prefs.volumeUnit,
+                      prefs.language,
+                    )}{" "}
+                    (
+                    {selectPlural(prefs.language, maxGlasses, {
+                      one: t("glassesCountOne", { count: maxGlasses }),
+                      other: t("glassesCountOther", { count: maxGlasses }),
+                    })}
+                    )
                   </p>
                 </div>
                 <button
@@ -328,7 +345,11 @@ export function SettingsScreen() {
                     {t("glassSize")}
                   </p>
                   <p className="text-[14px] font-bold text-[var(--ink)]">
-                    {prefs.water.glassSizeMl} ml
+                    {formatVolume(
+                      prefs.water.glassSizeMl,
+                      prefs.volumeUnit,
+                      prefs.language,
+                    )}
                   </p>
                 </div>
                 <button
@@ -337,6 +358,33 @@ export function SettingsScreen() {
                   onClick={() => setEditingGlass(true)}
                   className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
                   aria-label={t("editGlassSize")}
+                >
+                  {t("edit")}
+                  <MaskIcon name="edit" size={12} />
+                </button>
+              </div>
+              <div className="h-px w-full bg-[var(--border)]" />
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-normal text-[var(--muted)]">
+                    {t("volumeUnit")}
+                  </p>
+                  <p className="text-[14px] font-bold text-[var(--ink)]">
+                    {prefs.volumeUnit === "fl_oz"
+                      ? t("volumeUnitFlOz")
+                      : t("volumeUnitMl")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={!waterEnabled}
+                  onClick={() =>
+                    setVolumeUnit(
+                      prefs.volumeUnit === "ml" ? "fl_oz" : "ml",
+                    )
+                  }
+                  className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[12px] font-extrabold text-[var(--purple)] disabled:text-[var(--muted)]"
+                  aria-label={t("volumeUnit")}
                 >
                   {t("edit")}
                   <MaskIcon name="edit" size={12} />
@@ -436,10 +484,22 @@ export function SettingsScreen() {
           />
           <div className="h-px bg-[var(--border)]" />
           <SettingsRow
+            label={t("openPrivacyPolicy")}
+            onClick={() => handleOpenExternal(PRIVACY_POLICY_URL)}
+          />
+          <div className="h-px bg-[var(--border)]" />
+          <SettingsRow
             label={t("termsOfUse")}
             onClick={() => setInfoModal("terms")}
           />
+          <div className="h-px bg-[var(--border)]" />
+          <SettingsRow
+            label={t("openTermsOfService")}
+            onClick={() => handleOpenExternal(TERMS_OF_SERVICE_URL)}
+          />
         </section>
+
+        <MedicalDisclaimer compact className="mb-4" />
 
         <div className="mb-4 flex items-center gap-3 rounded-[24px] border border-[var(--border)] bg-[var(--privacy)] p-4">
           <Icon name="shield" size={24} />
@@ -454,7 +514,7 @@ export function SettingsScreen() {
           className="mb-2 flex min-h-11 w-full items-center justify-center gap-3 py-4 text-[var(--danger)]"
         >
           <MaskIcon name="trash" size={20} />
-          <span className="text-[16px] font-black">{t("resetAllData")}</span>
+          <span className="text-[16px] font-black">{t("deleteAllMyData")}</span>
         </button>
 
         <AppVersion className="mb-2 mt-2" />

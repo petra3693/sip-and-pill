@@ -78,11 +78,15 @@ export interface NotificationSettings {
 
 export interface UserPreferences {
   onboardingComplete: boolean;
+  /** User acknowledged the medical disclaimer during onboarding. */
+  medicalDisclaimerAccepted: boolean;
   language: LanguageCode;
   /** Dashboard theme (home / about / settings). Defaults to dark after onboarding. */
   theme: AppTheme;
   name: string;
   trackingMode: TrackingMode;
+  /** Display unit; values are always stored in milliliters. */
+  volumeUnit: "ml" | "fl_oz";
   water: WaterSettings;
   medications: Medication[];
   reminders: ReminderSchedule;
@@ -97,6 +101,7 @@ export type OnboardingStep =
   | "language"
   | "name"
   | "tracking"
+  | "disclaimer"
   | "water-goal"
   | "medications"
   | "reminders";

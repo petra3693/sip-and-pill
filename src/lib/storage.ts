@@ -1,3 +1,4 @@
+import { Preferences } from "@capacitor/preferences";
 import {
   DEFAULT_PREFERENCES,
   LANGUAGES,
@@ -5,9 +6,11 @@ import {
   STORAGE_KEY,
   todayKey,
 } from "@/lib/constants";
+import { cancelAllLocalNotifications } from "@/lib/notifications";
 import type { AppTheme, LanguageCode, UserPreferences } from "@/types";
 
 const LANGUAGE_CODES = new Set(LANGUAGES.map((lang) => lang.code));
+const THEME_KEY = "sip-theme";
 
 function normalizeLanguage(code: unknown): LanguageCode {
   if (typeof code === "string" && LANGUAGE_CODES.has(code as LanguageCode)) {
@@ -39,6 +42,7 @@ export function resetDailyProgress(prefs: UserPreferences): UserPreferences {
     };
   }
 
+  // New local calendar day (after midnight): zero water + med intake.
   return {
     ...prefs,
     lastLogDate: today,
@@ -76,6 +80,8 @@ export function loadPreferences(): UserPreferences {
       ...parsed,
       language: normalizeLanguage(parsed.language),
       theme: normalizeTheme(parsed.theme),
+      medicalDisclaimerAccepted: Boolean(parsed.medicalDisclaimerAccepted),
+      volumeUnit: parsed.volumeUnit === "fl_oz" ? "fl_oz" : "ml",
       water: normalizeWaterSettings({
         ...DEFAULT_PREFERENCES.water,
         ...parsed.water,
@@ -108,7 +114,12 @@ export function savePreferences(prefs: UserPreferences): void {
     return;
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+  const payload = JSON.stringify(prefs);
+  window.localStorage.setItem(STORAGE_KEY, payload);
+  // Mirror into Capacitor Preferences when available (native persistence).
+  void Preferences.set({ key: STORAGE_KEY, value: payload }).catch(() => {
+    // Web / unavailable — localStorage is enough.
+  });
 }
 
 export function clearPreferences(): void {
@@ -117,4 +128,34 @@ export function clearPreferences(): void {
   }
 
   window.localStorage.removeItem(STORAGE_KEY);
+  void Preferences.remove({ key: STORAGE_KEY }).catch(() => undefined);
+}
+
+/**
+ * Guideline 5.1.1(v)/(ix): permanently erase all app-local user data.
+ * Clears Web localStorage keys we own, Capacitor Preferences, and cancels notifications.
+ * No IndexedDB is used by this app.
+ */
+export async function wipeAllLocalData(): Promise<void> {
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(THEME_KEY);
+    } catch {
+      // private mode
+    }
+  }
+
+  try {
+    await Preferences.clear();
+  } catch {
+    try {
+      await Preferences.remove({ key: STORAGE_KEY });
+      await Preferences.remove({ key: THEME_KEY });
+    } catch {
+      // ignore
+    }
+  }
+
+  await cancelAllLocalNotifications();
 }

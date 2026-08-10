@@ -3,7 +3,7 @@ interface ProgressBarProps {
   total?: number;
 }
 
-export function ProgressBar({ step, total = 6 }: ProgressBarProps) {
+export function ProgressBar({ step, total = 7 }: ProgressBarProps) {
   const clamped = Math.min(total, Math.max(0, step));
 
   return (

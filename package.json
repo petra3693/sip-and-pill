@@ -12,9 +12,13 @@
   },
   "dependencies": {
     "@capacitor-community/in-app-review": "^8.0.0",
+    "@capacitor/app": "^8.1.1",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/core": "^8.5.0",
+    "@capacitor/haptics": "^8.0.2",
     "@capacitor/ios": "^8.5.0",
+    "@capacitor/local-notifications": "^8.2.1",
+    "@capacitor/preferences": "^8.0.1",
     "@capacitor/share": "^8.0.1",
     "next": "^15.5.2",
     "react": "^19.1.1",

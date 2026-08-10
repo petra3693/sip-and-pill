@@ -6,6 +6,7 @@ import { useApp } from "@/context/AppContext";
 import { useScreenChrome } from "@/hooks/useScreenChrome";
 import { useT } from "@/hooks/useT";
 import { CHROME_PURPLE } from "@/lib/chrome";
+import { ONBOARDING_TOTAL_STEPS } from "@/lib/screens";
 
 interface ScreenShellProps {
   children: ReactNode;
@@ -62,7 +63,7 @@ export function ScreenShell({
       <div className="flex min-h-full flex-col">
         {typeof step === "number" ? (
           <div className="safe-top w-full shrink-0 px-6 pt-2 pb-1">
-            <ProgressBar step={step} />
+            <ProgressBar step={step} total={ONBOARDING_TOTAL_STEPS} />
           </div>
         ) : null}
 

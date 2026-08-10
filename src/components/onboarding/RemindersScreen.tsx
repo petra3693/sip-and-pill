@@ -8,6 +8,7 @@ import { TimePickerModal } from "@/components/ui/TimePickerModal";
 import { ToggleSwitch } from "@/components/ui/ToggleSwitch";
 import { useApp } from "@/context/AppContext";
 import { useT } from "@/hooks/useT";
+import { formatStoredTime } from "@/lib/format";
 import type { TranslationKey } from "@/lib/i18n";
 import { ONBOARDING_PROGRESS } from "@/lib/screens";
 import type { ReminderFrequency } from "@/types";
@@ -122,7 +123,7 @@ export function RemindersScreen() {
                     </p>
                     <div className="flex items-center gap-4">
                       <p className="text-[14px] font-extrabold text-[var(--ink)]">
-                        {item.time}
+                        {formatStoredTime(item.time, prefs.language)}
                       </p>
                       <button
                         type="button"
@@ -138,7 +139,7 @@ export function RemindersScreen() {
                   <ToggleSwitch
                     checked={item.enabled}
                     onChange={() => toggleReminderTime(item.id)}
-                    ariaLabel={`${t("editTime")} ${item.time}`}
+                    ariaLabel={`${t("editTime")} ${formatStoredTime(item.time, prefs.language)}`}
                   />
                 </div>
               ))}

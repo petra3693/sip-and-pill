@@ -5,10 +5,32 @@ export const WEBSITE_URL = "https://www.sip-and-pill.app/";
 export const APP_SHARE_URL = WEBSITE_URL;
 
 /**
+ * Hosted Privacy Policy URL (App Store Connect + in-app external link).
+ * Override with NEXT_PUBLIC_PRIVACY_URL when a dedicated page is live.
+ */
+export const PRIVACY_POLICY_URL =
+  (typeof process !== "undefined" &&
+    process.env.NEXT_PUBLIC_PRIVACY_URL?.trim()) ||
+  `${WEBSITE_URL}#privacy`;
+
+/**
+ * Hosted Terms of Service URL.
+ * Override with NEXT_PUBLIC_TERMS_URL when a dedicated page is live.
+ */
+export const TERMS_OF_SERVICE_URL =
+  (typeof process !== "undefined" &&
+    process.env.NEXT_PUBLIC_TERMS_URL?.trim()) ||
+  `${WEBSITE_URL}#terms`;
+
+/**
  * Support inbox used when composing mail from the in-app form.
  * Do not render this string prominently in the UI.
  */
 export const SUPPORT_EMAIL = "raving.pascal@gmail.com";
+
+/** Exact medical disclaimer required for App Store health-tracking apps. */
+export const MEDICAL_DISCLAIMER_EN =
+  "Sip & Pill is designed for tracking and informational purposes only. It is not a medical device and does not provide medical advice, diagnosis, or treatment. Always consult with a qualified healthcare professional regarding your health and medication schedule.";
 
 /** Data controller / developer (GDPR Art. 13 / DSGVO). */
 export const LEGAL_CONTROLLER_NAME = "Petra Szakacs";

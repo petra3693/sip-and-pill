@@ -5,6 +5,7 @@ import { useEffect, type ReactNode } from "react";
 import { AboutScreen } from "@/components/dashboard/AboutScreen";
 import { HomeScreen } from "@/components/dashboard/HomeScreen";
 import { SettingsScreen } from "@/components/dashboard/SettingsScreen";
+import { DisclaimerScreen } from "@/components/onboarding/DisclaimerScreen";
 import { LanguageScreen } from "@/components/onboarding/LanguageScreen";
 import { MedicationsScreen } from "@/components/onboarding/MedicationsScreen";
 import { NameScreen } from "@/components/onboarding/NameScreen";
@@ -26,6 +27,8 @@ export function renderScreen(screen: AppScreen): ReactNode {
       return <NameScreen />;
     case "tracking":
       return <TrackingScreen />;
+    case "disclaimer":
+      return <DisclaimerScreen />;
     case "water-goal":
       return <WaterGoalScreen />;
     case "medications":

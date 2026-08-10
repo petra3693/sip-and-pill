@@ -95,10 +95,12 @@ export const DEFAULT_REMINDERS: ReminderSchedule = {
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
   onboardingComplete: false,
+  medicalDisclaimerAccepted: false,
   language: "en",
   theme: "dark",
   name: "",
   trackingMode: "both",
+  volumeUnit: "ml",
   water: {
     dailyGoalMl: 2000,
     glassSizeMl: 250,
@@ -144,6 +146,13 @@ export function todayKey(date = new Date()): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+/** Milliseconds until the next local-midnight day boundary. */
+export function msUntilNextLocalMidnight(from = new Date()): number {
+  const next = new Date(from);
+  next.setHours(24, 0, 0, 0);
+  return Math.max(1, next.getTime() - from.getTime());
 }
 
 export function createId(prefix: string): string {

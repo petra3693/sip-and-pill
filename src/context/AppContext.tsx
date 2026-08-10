@@ -14,17 +14,24 @@ import {
   createId,
   DEFAULT_PREFERENCES,
   DEFAULT_REMINDERS,
+  msUntilNextLocalMidnight,
   normalizeWaterSettings,
   notificationsFromSetup,
   todayKey,
 } from "@/lib/constants";
+import { triggerHaptic } from "@/lib/haptics";
 import { translate } from "@/lib/i18n";
+import {
+  ensureNotificationPermission,
+  syncLocalNotifications,
+} from "@/lib/notifications";
 import { ONBOARDING_FLOW } from "@/lib/screens";
 import {
   clearPreferences,
   loadPreferences,
   resetDailyProgress,
   savePreferences,
+  wipeAllLocalData,
 } from "@/lib/storage";
 import type {
   AppScreen,
@@ -40,6 +47,8 @@ import type {
   UserPreferences,
   WaterSettings,
 } from "@/types";
+import { Capacitor } from "@capacitor/core";
+import { App as CapApp } from "@capacitor/app";
 
 const DASHBOARD_SCREENS = new Set<AppScreen>(["home", "about", "settings"]);
 
@@ -73,6 +82,8 @@ interface AppContextValue {
   updateNotifications: (partial: Partial<NotificationSettings>) => void;
   markCelebrationShown: (kind: keyof Omit<CelebrationFlags, "date">) => void;
   logGlass: (delta: number) => void;
+  acknowledgeMedicalDisclaimer: () => void;
+  setVolumeUnit: (unit: UserPreferences["volumeUnit"]) => void;
   completeOnboarding: () => void;
   resetAllData: () => void;
 }
@@ -82,9 +93,11 @@ const AppContext = createContext<AppContextValue | null>(null);
 export const DEMO_PREFERENCES: UserPreferences = {
   ...DEFAULT_PREFERENCES,
   onboardingComplete: true,
+  medicalDisclaimerAccepted: true,
   name: "Maria",
   language: "en",
   trackingMode: "both",
+  volumeUnit: "ml",
   water: {
     dailyGoalMl: 2000,
     glassSizeMl: 250,
@@ -206,6 +219,19 @@ export function AppProvider({
     setHydrated(true);
   }, [demo, persist]);
 
+  // Existing installs that never saw the medical disclaimer must accept it once.
+  useEffect(() => {
+    if (!hydrated || demo) return;
+    if (prefs.onboardingComplete && !prefs.medicalDisclaimerAccepted) {
+      setScreen("disclaimer");
+    }
+  }, [
+    hydrated,
+    demo,
+    prefs.onboardingComplete,
+    prefs.medicalDisclaimerAccepted,
+  ]);
+
   useEffect(() => {
     if (!hydrated || !persist || demo) {
       return;
@@ -213,20 +239,58 @@ export function AppProvider({
     savePreferences(prefs);
   }, [prefs, hydrated, persist, demo]);
 
-  // Midnight daily reset while the app stays open.
+  // Local-midnight daily cycle: zero water glasses + medication taken flags.
   useEffect(() => {
     if (!hydrated || demo) return;
 
-    const check = () => {
+    const applyDailyReset = () => {
       setPrefs((prev) => {
         const next = resetDailyProgress(prev);
         return next === prev ? prev : next;
       });
     };
 
-    check();
-    const id = window.setInterval(check, 30_000);
-    return () => window.clearInterval(id);
+    applyDailyReset();
+
+    let midnightTimer = 0;
+    const scheduleMidnight = () => {
+      window.clearTimeout(midnightTimer);
+      midnightTimer = window.setTimeout(() => {
+        applyDailyReset();
+        scheduleMidnight();
+      }, msUntilNextLocalMidnight() + 100);
+    };
+    scheduleMidnight();
+
+    // iOS/Android WebView may pause timers in background — catch resume.
+    const onVisible = () => {
+      if (document.visibilityState === "visible") applyDailyReset();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", applyDailyReset);
+    window.addEventListener("pageshow", applyDailyReset);
+
+    let removeCapApp: (() => void) | undefined;
+    if (Capacitor.isNativePlatform()) {
+      const sub = CapApp.addListener("appStateChange", ({ isActive }) => {
+        if (isActive) applyDailyReset();
+      });
+      removeCapApp = () => {
+        void sub.then((handle) => handle.remove());
+      };
+    }
+
+    // Backup poll in case a single midnight timer was deferred.
+    const backupId = window.setInterval(applyDailyReset, 60_000);
+
+    return () => {
+      window.clearTimeout(midnightTimer);
+      window.clearInterval(backupId);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", applyDailyReset);
+      window.removeEventListener("pageshow", applyDailyReset);
+      removeCapApp?.();
+    };
   }, [hydrated, demo]);
 
   // Dark by default everywhere. Light only on home / about / settings
@@ -245,7 +309,9 @@ export function AppProvider({
 
   const updatePrefs = useCallback(
     (updater: (prev: UserPreferences) => UserPreferences) => {
-      setPrefs((prev) => updater(prev));
+      // Always roll the day forward before mutating so midnight can't be skipped
+      // by the first tap after the calendar date changes.
+      setPrefs((prev) => updater(resetDailyProgress(prev)));
     },
     []
   );
@@ -260,6 +326,7 @@ export function AppProvider({
       screen === "language" ||
       screen === "name" ||
       screen === "tracking" ||
+      screen === "disclaimer" ||
       screen === "water-goal" ||
       screen === "medications" ||
       screen === "reminders"
@@ -274,6 +341,7 @@ export function AppProvider({
       screen === "language" ||
       screen === "name" ||
       screen === "tracking" ||
+      screen === "disclaimer" ||
       screen === "water-goal" ||
       screen === "medications" ||
       screen === "reminders"
@@ -379,6 +447,7 @@ export function AppProvider({
 
   const toggleMedicationTaken = useCallback(
     (id: string) => {
+      void triggerHaptic("medium");
       updatePrefs((prev) => ({
         ...prev,
         lastLogDate: todayKey(),
@@ -463,16 +532,41 @@ export function AppProvider({
 
   const updateNotifications = useCallback(
     (partial: Partial<NotificationSettings>) => {
-      updatePrefs((prev) => ({
-        ...prev,
-        notifications: { ...prev.notifications, ...partial },
-      }));
+      void (async () => {
+        const enabling =
+          partial.waterReminders === true || partial.pillAlarms === true;
+        // Never prompt on cold launch — only when the user turns a reminder ON.
+        if (enabling) {
+          await ensureNotificationPermission();
+        }
+
+        const holder: { current: UserPreferences | null } = { current: null };
+        updatePrefs((prev) => {
+          holder.current = {
+            ...prev,
+            notifications: { ...prev.notifications, ...partial },
+          };
+          return holder.current;
+        });
+
+        // Allow React to commit, then sync native schedules from the merged prefs.
+        await Promise.resolve();
+        if (holder.current) {
+          await syncLocalNotifications(holder.current, {
+            waterTitle: translate(holder.current.language, "notificationWaterTitle"),
+            waterBody: translate(holder.current.language, "notificationWaterBody"),
+            pillTitle: translate(holder.current.language, "notificationPillTitle"),
+            pillBody: translate(holder.current.language, "notificationPillBody"),
+          });
+        }
+      })();
     },
     [updatePrefs]
   );
 
   const markCelebrationShown = useCallback(
     (kind: keyof Omit<CelebrationFlags, "date">) => {
+      void triggerHaptic("success");
       updatePrefs((prev) => ({
         ...prev,
         celebrations: {
@@ -487,6 +581,7 @@ export function AppProvider({
 
   const logGlass = useCallback(
     (delta: number) => {
+      void triggerHaptic(delta > 0 ? "light" : "medium");
       updatePrefs((prev) => {
         const water = normalizeWaterSettings(prev.water);
         const maxGlasses = Math.max(
@@ -507,27 +602,66 @@ export function AppProvider({
     [updatePrefs]
   );
 
-  const completeOnboarding = useCallback(() => {
+  const acknowledgeMedicalDisclaimer = useCallback(() => {
     updatePrefs((prev) => ({
       ...prev,
-      onboardingComplete: true,
-      theme: "dark",
-      lastLogDate: todayKey(),
-      // Lock Settings toggles to what was chosen in the first-setup reminders flow.
-      notifications: notificationsFromSetup(
-        prev.trackingMode,
-        prev.reminders.times,
-      ),
+      medicalDisclaimerAccepted: true,
     }));
-    setScreen("home");
+  }, [updatePrefs]);
+
+  const setVolumeUnit = useCallback(
+    (volumeUnit: UserPreferences["volumeUnit"]) => {
+      updatePrefs((prev) => ({ ...prev, volumeUnit }));
+    },
+    [updatePrefs]
+  );
+
+  const completeOnboarding = useCallback(() => {
+    void (async () => {
+      const holder: { current: UserPreferences | null } = { current: null };
+      updatePrefs((prev) => {
+        const notifications = notificationsFromSetup(
+          prev.trackingMode,
+          prev.reminders.times,
+        );
+        holder.current = {
+          ...prev,
+          onboardingComplete: true,
+          medicalDisclaimerAccepted: true,
+          theme: "dark",
+          lastLogDate: todayKey(),
+          notifications,
+        };
+        return holder.current;
+      });
+      setScreen("home");
+
+      const snapshot = holder.current;
+      if (
+        snapshot &&
+        (snapshot.notifications.waterReminders ||
+          snapshot.notifications.pillAlarms)
+      ) {
+        await ensureNotificationPermission();
+        await syncLocalNotifications(snapshot, {
+          waterTitle: translate(snapshot.language, "notificationWaterTitle"),
+          waterBody: translate(snapshot.language, "notificationWaterBody"),
+          pillTitle: translate(snapshot.language, "notificationPillTitle"),
+          pillBody: translate(snapshot.language, "notificationPillBody"),
+        });
+      }
+    })();
   }, [updatePrefs]);
 
   const resetAllData = useCallback(() => {
-    if (persist && !demo) {
-      clearPreferences();
-    }
-    setPrefs(demo ? DEMO_PREFERENCES : DEFAULT_PREFERENCES);
-    setScreen(demo ? "home" : "splash");
+    void (async () => {
+      if (persist && !demo) {
+        await wipeAllLocalData();
+        clearPreferences();
+      }
+      setPrefs(demo ? DEMO_PREFERENCES : DEFAULT_PREFERENCES);
+      setScreen(demo ? "home" : "splash");
+    })();
   }, [demo, persist]);
 
   const value = useMemo<AppContextValue>(
@@ -556,6 +690,8 @@ export function AppProvider({
       updateNotifications,
       markCelebrationShown,
       logGlass,
+      acknowledgeMedicalDisclaimer,
+      setVolumeUnit,
       completeOnboarding,
       resetAllData,
     }),
@@ -583,6 +719,8 @@ export function AppProvider({
       updateNotifications,
       markCelebrationShown,
       logGlass,
+      acknowledgeMedicalDisclaimer,
+      setVolumeUnit,
       completeOnboarding,
       resetAllData,
     ]

@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { useApp } from "@/context/AppContext";
 import { useT } from "@/hooks/useT";
+import { formatLocaleTime } from "@/lib/format";
 import { formatTimeDisplay, parseTimeToMinutes } from "@/lib/time";
 
 interface TimePickerModalProps {
@@ -22,6 +24,7 @@ export function TimePickerModal({
   onSave,
 }: TimePickerModalProps) {
   const t = useT();
+  const { prefs } = useApp();
   const [hours, setHours] = useState(8);
   const [minutes, setMinutes] = useState(0);
 
@@ -91,7 +94,7 @@ export function TimePickerModal({
         </label>
       </div>
       <p className="mt-4 text-center text-[14px] font-bold text-[var(--purple)]">
-        {formatTimeDisplay(hours, minutes)}
+        {formatLocaleTime(hours, minutes, prefs.language)}
       </p>
     </Modal>
   );

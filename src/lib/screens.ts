@@ -6,20 +6,24 @@ export const ONBOARDING_FLOW: OnboardingStep[] = [
   "language",
   "name",
   "tracking",
+  "disclaimer",
   "water-goal",
   "medications",
   "reminders",
 ];
 
-/** Progress bar step (1–6) for onboarding screens that show the bar. */
+/** Progress bar step (1–7) for onboarding screens that show the bar. */
 export const ONBOARDING_PROGRESS: Partial<Record<AppScreen, number>> = {
   language: 1,
   name: 2,
   tracking: 3,
-  "water-goal": 4,
-  medications: 5,
-  reminders: 6,
+  disclaimer: 4,
+  "water-goal": 5,
+  medications: 6,
+  reminders: 7,
 };
+
+export const ONBOARDING_TOTAL_STEPS = 7;
 
 export const SCREEN_META: {
   id: AppScreen;
@@ -30,6 +34,7 @@ export const SCREEN_META: {
   { id: "language", label: "Language" },
   { id: "name", label: "Name" },
   { id: "tracking", label: "Tracking" },
+  { id: "disclaimer", label: "Disclaimer" },
   { id: "water-goal", label: "Water Goal" },
   { id: "medications", label: "Medications" },
   { id: "reminders", label: "Reminders" },
