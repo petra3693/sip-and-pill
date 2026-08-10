@@ -1,6 +1,5 @@
 "use client";
 
-import { MEDICAL_DISCLAIMER_EN } from "@/lib/appLinks";
 import { useT } from "@/hooks/useT";
 
 interface MedicalDisclaimerProps {
@@ -9,10 +8,7 @@ interface MedicalDisclaimerProps {
   className?: string;
 }
 
-/**
- * App Store medical disclaimer — always shown in English as the canonical
- * legal text; surrounding UI chrome uses the active language.
- */
+/** App Store medical disclaimer — body and title follow the active language. */
 export function MedicalDisclaimer({
   compact = false,
   className = "",
@@ -45,7 +41,7 @@ export function MedicalDisclaimer({
           compact ? "text-[12px]" : "text-[13px]",
         ].join(" ")}
       >
-        {MEDICAL_DISCLAIMER_EN}
+        {t("medicalDisclaimerBody")}
       </p>
     </aside>
   );

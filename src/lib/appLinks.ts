@@ -28,10 +28,6 @@ export const TERMS_OF_SERVICE_URL =
  */
 export const SUPPORT_EMAIL = "raving.pascal@gmail.com";
 
-/** Exact medical disclaimer required for App Store health-tracking apps. */
-export const MEDICAL_DISCLAIMER_EN =
-  "Sip & Pill is designed for tracking and informational purposes only. It is not a medical device and does not provide medical advice, diagnosis, or treatment. Always consult with a qualified healthcare professional regarding your health and medication schedule.";
-
 /** Data controller / developer (GDPR Art. 13 / DSGVO). */
 export const LEGAL_CONTROLLER_NAME = "Petra Szakacs";
 

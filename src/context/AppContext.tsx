@@ -78,7 +78,7 @@ interface AppContextValue {
   toggleReminderTime: (id: string) => void;
   updateReminderTime: (id: string, time: string) => void;
   /** Align medication reminder rows with the dose slots chosen on Meds screen. */
-  syncMedReminders: (timesPerDay: number) => void;
+  syncMedReminders: (enabledSlots: MedTimeSlot[]) => void;
   updateNotifications: (partial: Partial<NotificationSettings>) => void;
   markCelebrationShown: (kind: keyof Omit<CelebrationFlags, "date">) => void;
   logGlass: (delta: number) => void;
@@ -521,11 +521,17 @@ export function AppProvider({
   );
 
   const syncMedReminders = useCallback(
-    (timesPerDay: number) => {
+    (enabledSlots: MedTimeSlot[]) => {
       updatePrefs((prev) => {
-        const times = buildMedReminders(timesPerDay, prev.reminders.times);
+        const slots =
+          enabledSlots.length > 0 ? enabledSlots : (["morning"] as MedTimeSlot[]);
+        const times = buildMedReminders(slots, prev.reminders.times);
         return {
           ...prev,
+          // Drop meds for slots the user turned off (kept in UI until Continue).
+          medications: prev.medications.filter((med) =>
+            slots.includes(med.timeSlot),
+          ),
           reminders: {
             ...prev.reminders,
             times,

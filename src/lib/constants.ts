@@ -59,18 +59,21 @@ export const MED_SLOT_REMINDER_DEFAULTS: Record<
 };
 
 /**
- * Build medication reminder rows for the first `timesPerDay` slots.
+ * Build medication reminder rows for the given enabled slots (any combination).
  * Preserves prior time/enabled when the same slot id already exists.
+ * Falls back to the first slot if `enabledSlots` is empty.
  */
 export function buildMedReminders(
-  timesPerDay: number,
+  enabledSlots: readonly MedTimeSlot[],
   previous: ReminderTime[] = [],
 ): ReminderTime[] {
-  const count = Math.min(
-    MAX_MED_TIMES_PER_DAY,
-    Math.max(1, Math.round(timesPerDay)),
-  );
-  return MED_TIME_SLOTS.slice(0, count).map((slot) => {
+  const unique = MED_TIME_SLOTS.filter((slot) => enabledSlots.includes(slot));
+  const slots =
+    unique.length > 0
+      ? unique.slice(0, MAX_MED_TIMES_PER_DAY)
+      : ([MED_TIME_SLOTS[0]] as MedTimeSlot[]);
+
+  return slots.map((slot) => {
     const defaults = MED_SLOT_REMINDER_DEFAULTS[slot];
     const id = `rem-${slot}`;
     const prev =
@@ -86,11 +89,23 @@ export function buildMedReminders(
   });
 }
 
+/** Convenience: first N slots in canonical order (defaults / migrations). */
+export function buildMedRemindersByCount(
+  timesPerDay: number,
+  previous: ReminderTime[] = [],
+): ReminderTime[] {
+  const count = Math.min(
+    MAX_MED_TIMES_PER_DAY,
+    Math.max(1, Math.round(timesPerDay)),
+  );
+  return buildMedReminders(MED_TIME_SLOTS.slice(0, count), previous);
+}
+
 export const DEFAULT_REMINDERS: ReminderSchedule = {
   frequency: "3x-daily",
   soundEnabled: true,
   vibrationEnabled: true,
-  times: buildMedReminders(3),
+  times: buildMedRemindersByCount(3),
 };
 
 export const DEFAULT_PREFERENCES: UserPreferences = {

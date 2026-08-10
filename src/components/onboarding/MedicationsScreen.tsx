@@ -30,6 +30,17 @@ const SLOT_LABEL_KEYS: Record<MedTimeSlot, TranslationKey> = {
   night: "night",
 };
 
+function initialEnabledSlots(
+  medications: { timeSlot: MedTimeSlot }[],
+): Set<MedTimeSlot> {
+  const fromMeds = MED_TIME_SLOTS.filter((slot) =>
+    medications.some((med) => med.timeSlot === slot),
+  );
+  if (fromMeds.length > 0) return new Set(fromMeds);
+  // Default: morning + noon + evening (common 3x/day), not first-N-only midmorning.
+  return new Set<MedTimeSlot>(["morning", "noon", "evening"]);
+}
+
 export function MedicationsScreen() {
   const {
     prefs,
@@ -41,19 +52,16 @@ export function MedicationsScreen() {
   } = useApp();
   const t = useT();
 
-  const [timesPerDay, setTimesPerDay] = useState(() =>
-    Math.min(
-      MAX_MED_TIMES_PER_DAY,
-      Math.max(1, new Set(prefs.medications.map((m) => m.timeSlot)).size),
-    ),
+  const [enabledSlots, setEnabledSlots] = useState<Set<MedTimeSlot>>(() =>
+    initialEnabledSlots(prefs.medications),
   );
 
   const visibleSlots = useMemo(
-    () => MED_TIME_SLOTS.slice(0, timesPerDay),
-    [timesPerDay],
+    () => MED_TIME_SLOTS.filter((slot) => enabledSlots.has(slot)),
+    [enabledSlots],
   );
 
-  // Seed each slot once when it first becomes visible — never re-create after delete.
+  // Seed each enabled slot once when it first becomes visible — never re-create after delete.
   const seededSlotsRef = useRef<Set<MedTimeSlot>>(new Set());
 
   useEffect(() => {
@@ -68,8 +76,22 @@ export function MedicationsScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- seed only when slots appear
   }, [visibleSlots, addMedication]);
 
+  const toggleSlot = (slot: MedTimeSlot) => {
+    setEnabledSlots((prev) => {
+      const next = new Set(prev);
+      if (next.has(slot)) {
+        if (next.size <= 1) return prev; // keep at least one
+        next.delete(slot);
+      } else {
+        if (next.size >= MAX_MED_TIMES_PER_DAY) return prev;
+        next.add(slot);
+      }
+      return next;
+    });
+  };
+
   const handleContinue = () => {
-    syncMedReminders(timesPerDay);
+    syncMedReminders(visibleSlots);
     goToNextOnboarding();
   };
 
@@ -89,31 +111,36 @@ export function MedicationsScreen() {
             className="animate-float"
           />
         </div>
-        <div className="mt-2 flex items-center justify-center gap-9">
-          <button
-            type="button"
-            onClick={() => setTimesPerDay((n) => Math.max(1, n - 1))}
-            className="flex size-11 items-center justify-center rounded-full bg-[var(--coral-muted)] text-[var(--coral)]"
-            aria-label={t("decreaseTimes")}
-          >
-            <MaskIcon name="minus" size={20} />
-          </button>
-          <div>
-            <p className="text-[32px] font-extrabold leading-none">
-              {timesPerDay}x
-            </p>
-            <p className="text-[12px] font-bold">{t("day")}</p>
-          </div>
-          <button
-            type="button"
-            onClick={() =>
-              setTimesPerDay((n) => Math.min(MAX_MED_TIMES_PER_DAY, n + 1))
-            }
-            className="flex size-11 items-center justify-center rounded-full bg-[var(--coral-muted)] text-[var(--coral)]"
-            aria-label={t("increaseTimes")}
-          >
-            <MaskIcon name="plus" size={20} />
-          </button>
+        <p className="mt-3 text-[32px] font-extrabold leading-none">
+          {visibleSlots.length}x
+        </p>
+        <p className="mt-1 text-[12px] font-bold">{t("day")}</p>
+        <p className="mt-3 text-[12px] font-semibold leading-4 opacity-90">
+          {t("chooseMedTimes")}
+        </p>
+        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+          {MED_TIME_SLOTS.map((slot) => {
+            const on = enabledSlots.has(slot);
+            const alone = on && enabledSlots.size === 1;
+            return (
+              <button
+                key={slot}
+                type="button"
+                onClick={() => toggleSlot(slot)}
+                aria-pressed={on}
+                disabled={alone}
+                className={[
+                  "rounded-full px-2.5 py-1.5 text-[11px] font-extrabold transition",
+                  on
+                    ? "bg-[var(--coral-muted)] text-[var(--coral)]"
+                    : "bg-white/20 text-[var(--cta-ink)]",
+                  alone ? "opacity-80" : "",
+                ].join(" ")}
+              >
+                {t(SLOT_LABEL_KEYS[slot])}
+              </button>
+            );
+          })}
         </div>
       </div>
 
