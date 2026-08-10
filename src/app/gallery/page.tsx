@@ -47,6 +47,7 @@ function GalleryContent() {
   );
 }
 
+/** Dev-only route — excluded from `npm run build` / Capacitor via scripts/build.mjs. */
 export default function GalleryPage() {
   return (
     <AppProvider persist={false} demo>

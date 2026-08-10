@@ -44,6 +44,7 @@ export const LEGAL_POSTAL_ADDRESS = "Einbecker Straße 64A, 10315 Berlin, German
  * Numeric Apple App Store ID from App Store Connect.
  * Leave empty until the listing exists — in-app review still works via StoreKit.
  */
+// TODO: set after App Store Connect approval — required for in-app review prompts to deep-link correctly
 export const APP_STORE_ID = "";
 
 /**
