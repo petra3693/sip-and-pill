@@ -1,4 +1,4 @@
-package com.lumenappstudio.sipandpill;
+package com.sipandpill.app;
 
 import com.getcapacitor.BridgeActivity;
 

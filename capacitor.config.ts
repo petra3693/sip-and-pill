@@ -2,7 +2,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.lumenappstudio.sipandpill",
+  appId: "com.sipandpill.app",
   appName: "Sip & Pill",
   webDir: "out",
   plugins: {
