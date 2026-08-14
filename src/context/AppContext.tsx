@@ -94,7 +94,7 @@ interface AppContextValue {
   logGlass: (delta: number) => void;
   acknowledgeMedicalDisclaimer: () => void;
   setVolumeUnit: (unit: UserPreferences["volumeUnit"]) => void;
-  completeOnboarding: () => void;
+  completeOnboarding: (options?: { enableNotifications?: boolean }) => Promise<void>;
   resetAllData: () => void;
 }
 
@@ -596,7 +596,8 @@ export function AppProvider({
 
         let permissionDenied = false;
         if (enabling) {
-          // Never prompt on cold launch — only when the user turns a reminder ON.
+          // Settings toggles: prompt only when the user turns a reminder ON.
+          // First-run permission is requested on the onboarding reminders step.
           const granted = await requestNotificationPermission();
           if (!granted) {
             permissionDenied = true;
@@ -730,14 +731,14 @@ export function AppProvider({
     [updatePrefs]
   );
 
-  const completeOnboarding = useCallback(() => {
-    void (async () => {
+  const completeOnboarding = useCallback(
+    async (options?: { enableNotifications?: boolean }) => {
+      const enableNotifications = options?.enableNotifications ?? false;
       const holder: { current: UserPreferences | null } = { current: null };
       updatePrefs((prev) => {
-        const notifications = notificationsFromSetup(
-          prev.trackingMode,
-          prev.reminders.times,
-        );
+        const notifications = enableNotifications
+          ? notificationsFromSetup(prev.trackingMode, prev.reminders.times)
+          : { waterReminders: false, pillAlarms: false };
         holder.current = {
           ...prev,
           onboardingComplete: true,
@@ -753,17 +754,18 @@ export function AppProvider({
       const snapshot = holder.current;
       if (
         snapshot &&
+        enableNotifications &&
         (snapshot.notifications.waterReminders ||
           snapshot.notifications.pillAlarms)
       ) {
-        await requestNotificationPermission();
         await syncLocalNotifications(
           snapshot,
           notificationCopy(snapshot.language),
         );
       }
-    })();
-  }, [updatePrefs]);
+    },
+    [updatePrefs],
+  );
 
   const resetAllData = useCallback(() => {
     const next = demo ? DEMO_PREFERENCES : DEFAULT_PREFERENCES;

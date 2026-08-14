@@ -354,9 +354,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 
   try {
-    const current = await LocalNotifications.checkPermissions();
-    if (current.display === "granted") return true;
-    if (current.display === "denied") return false;
+    // Call requestPermissions() directly from the user-gesture (button tap).
+    // Awaiting checkPermissions() first can drop iOS user-activation and hide the OS dialog.
     const requested = await LocalNotifications.requestPermissions();
     return requested.display === "granted";
   } catch (error) {

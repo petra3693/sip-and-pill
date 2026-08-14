@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { ScreenShell } from "@/components/ui/ScreenShell";
@@ -59,7 +60,16 @@ export function RemindersScreen() {
       step={ONBOARDING_PROGRESS.reminders}
       title={t("dailyReminders")}
       footer={
-        <Button onClick={completeOnboarding}>{t("finishSetup")}</Button>
+        <Button
+          onClick={async () => {
+            const result = await LocalNotifications.requestPermissions();
+            await completeOnboarding({
+              enableNotifications: result.display === "granted",
+            });
+          }}
+        >
+          {t("finishSetup")}
+        </Button>
       }
       className="relative"
     >
