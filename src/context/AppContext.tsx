@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -22,10 +23,18 @@ import {
 import { triggerHaptic } from "@/lib/haptics";
 import { translate } from "@/lib/i18n";
 import {
-  ensureNotificationPermission,
+  cancelPendingReminder,
+  initLocalNotificationListeners,
+  notificationCopy,
+  prefsWithDeletedPending,
+  prefsWithUpdatedPendingTime,
+  requestNotificationPermission,
+  reschedulePendingReminder,
   syncLocalNotifications,
+  type PendingReminder,
 } from "@/lib/notifications";
 import { ONBOARDING_FLOW } from "@/lib/screens";
+import { parseTimeToMinutes } from "@/lib/time";
 import {
   clearPreferences,
   loadPreferences,
@@ -80,6 +89,8 @@ interface AppContextValue {
   /** Align medication reminder rows with the dose slots chosen on Meds screen. */
   syncMedReminders: (enabledSlots: MedTimeSlot[]) => void;
   updateNotifications: (partial: Partial<NotificationSettings>) => void;
+  updatePendingReminderTime: (reminder: PendingReminder, time: string) => Promise<void>;
+  deletePendingReminder: (reminder: PendingReminder) => Promise<void>;
   markCelebrationShown: (kind: keyof Omit<CelebrationFlags, "date">) => void;
   logGlass: (delta: number) => void;
   acknowledgeMedicalDisclaimer: () => void;
@@ -206,6 +217,8 @@ export function AppProvider({
     demo ? "home" : "splash"
   );
   const [hydrated, setHydrated] = useState(demo);
+  const prefsRef = useRef(prefs);
+  prefsRef.current = prefs;
 
   useEffect(() => {
     if (demo || !persist) {
@@ -300,6 +313,29 @@ export function AppProvider({
     };
   }, [hydrated, demo]);
 
+  // Native local notifications: bind listeners once, reschedule on launch / resume.
+  useEffect(() => {
+    if (!hydrated || demo) return;
+
+    void initLocalNotificationListeners();
+    if (!Capacitor.isNativePlatform() || !persist) return;
+
+    const resync = () => {
+      const current = prefsRef.current;
+      if (!current.onboardingComplete) return;
+      void syncLocalNotifications(current, notificationCopy(current.language));
+    };
+
+    resync();
+
+    const sub = CapApp.addListener("appStateChange", ({ isActive }) => {
+      if (isActive) resync();
+    });
+    return () => {
+      void sub.then((handle) => handle.remove());
+    };
+  }, [hydrated, demo, persist]);
+
   // Dark by default everywhere. Light only on home / about / settings
   // when the user preference is light (persisted in prefs.theme).
   useEffect(() => {
@@ -360,7 +396,13 @@ export function AppProvider({
 
   const setLanguage = useCallback(
     (language: LanguageCode) => {
-      updatePrefs((prev) => ({ ...prev, language }));
+      updatePrefs((prev) => {
+        const next = { ...prev, language };
+        if (next.onboardingComplete) {
+          void syncLocalNotifications(next, notificationCopy(language));
+        }
+        return next;
+      });
     },
     [updatePrefs]
   );
@@ -470,7 +512,11 @@ export function AppProvider({
     (frequency: ReminderFrequency) => {
       updatePrefs((prev) => ({
         ...prev,
-        reminders: { ...prev.reminders, frequency },
+        reminders: {
+          ...prev.reminders,
+          frequency,
+          waterTimes: undefined,
+        },
       }));
     },
     [updatePrefs]
@@ -552,7 +598,7 @@ export function AppProvider({
         let permissionDenied = false;
         if (enabling) {
           // Never prompt on cold launch — only when the user turns a reminder ON.
-          const granted = await ensureNotificationPermission();
+          const granted = await requestNotificationPermission();
           if (!granted) {
             permissionDenied = true;
           }
@@ -588,26 +634,47 @@ export function AppProvider({
 
         await Promise.resolve();
         if (holder.current) {
-          await syncLocalNotifications(holder.current, {
-            waterTitle: translate(
-              holder.current.language,
-              "notificationWaterTitle",
-            ),
-            waterBody: translate(
-              holder.current.language,
-              "notificationWaterBody",
-            ),
-            pillTitle: translate(
-              holder.current.language,
-              "notificationPillTitle",
-            ),
-            pillBody: translate(
-              holder.current.language,
-              "notificationPillBody",
-            ),
-          });
+          await syncLocalNotifications(
+            holder.current,
+            notificationCopy(holder.current.language),
+          );
         }
       })();
+    },
+    [updatePrefs],
+  );
+
+  const updatePendingReminderTime = useCallback(
+    async (reminder: PendingReminder, time: string) => {
+      const total = parseTimeToMinutes(time);
+      const hour = Math.floor(total / 60) % 24;
+      const minute = total % 60;
+      const holder: { current: UserPreferences | null } = { current: null };
+      updatePrefs((prev) => {
+        holder.current = prefsWithUpdatedPendingTime(prev, reminder, hour, minute);
+        return holder.current;
+      });
+      if (holder.current) {
+        await reschedulePendingReminder(holder.current, reminder, hour, minute);
+      }
+    },
+    [updatePrefs],
+  );
+
+  const deletePendingReminder = useCallback(
+    async (reminder: PendingReminder) => {
+      const holder: { current: UserPreferences | null } = { current: null };
+      updatePrefs((prev) => {
+        holder.current = prefsWithDeletedPending(prev, reminder);
+        return holder.current;
+      });
+      await cancelPendingReminder(reminder.id);
+      if (holder.current) {
+        await syncLocalNotifications(
+          holder.current,
+          notificationCopy(holder.current.language),
+        );
+      }
     },
     [updatePrefs],
   );
@@ -690,13 +757,11 @@ export function AppProvider({
         (snapshot.notifications.waterReminders ||
           snapshot.notifications.pillAlarms)
       ) {
-        await ensureNotificationPermission();
-        await syncLocalNotifications(snapshot, {
-          waterTitle: translate(snapshot.language, "notificationWaterTitle"),
-          waterBody: translate(snapshot.language, "notificationWaterBody"),
-          pillTitle: translate(snapshot.language, "notificationPillTitle"),
-          pillBody: translate(snapshot.language, "notificationPillBody"),
-        });
+        await requestNotificationPermission();
+        await syncLocalNotifications(
+          snapshot,
+          notificationCopy(snapshot.language),
+        );
       }
     })();
   }, [updatePrefs]);
@@ -736,6 +801,8 @@ export function AppProvider({
       updateReminderTime,
       syncMedReminders,
       updateNotifications,
+      updatePendingReminderTime,
+      deletePendingReminder,
       markCelebrationShown,
       logGlass,
       acknowledgeMedicalDisclaimer,
@@ -765,6 +832,8 @@ export function AppProvider({
       updateReminderTime,
       syncMedReminders,
       updateNotifications,
+      updatePendingReminderTime,
+      deletePendingReminder,
       markCelebrationShown,
       logGlass,
       acknowledgeMedicalDisclaimer,

@@ -8,7 +8,7 @@ import {
   todayKey,
 } from "@/lib/constants";
 import { cancelAllLocalNotifications } from "@/lib/notifications";
-import type { AppTheme, LanguageCode, UserPreferences } from "@/types";
+import type { AppTheme, LanguageCode, UserPreferences, WaterReminderSlot } from "@/types";
 
 const LANGUAGE_CODES = new Set(LANGUAGES.map((lang) => lang.code));
 const THEME_KEY = "sip-theme";
@@ -23,6 +23,22 @@ function normalizeLanguage(code: unknown): LanguageCode {
 function normalizeTheme(value: unknown): AppTheme {
   // Default dark; only an explicit "light" preference opts out on dashboard.
   return value === "light" ? "light" : "dark";
+}
+
+function normalizeWaterTimes(value: unknown): WaterReminderSlot[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value
+    .map((slot) => {
+      if (!slot || typeof slot !== "object") return null;
+      const hour = Number((slot as { hour?: unknown }).hour);
+      const minute = Number((slot as { minute?: unknown }).minute);
+      if (!Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+      return {
+        hour: ((Math.round(hour) % 24) + 24) % 24,
+        minute: ((Math.round(minute) % 60) + 60) % 60,
+      };
+    })
+    .filter((slot): slot is WaterReminderSlot => slot !== null);
 }
 
 export function resetDailyProgress(prefs: UserPreferences): UserPreferences {
@@ -81,6 +97,7 @@ function parsePreferencesRaw(raw: string): UserPreferences {
       ...DEFAULT_PREFERENCES.reminders,
       ...parsed.reminders,
       times: parsed.reminders?.times ?? DEFAULT_PREFERENCES.reminders.times,
+      waterTimes: normalizeWaterTimes(parsed.reminders?.waterTimes),
     },
     notifications: {
       ...DEFAULT_PREFERENCES.notifications,

@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { BottomNav } from "@/components/dashboard/BottomNav";
 import { ContactSupportModal } from "@/components/dashboard/ContactSupportModal";
+import { PendingRemindersList } from "@/components/dashboard/PendingRemindersList";
 import { AppVersion } from "@/components/ui/AppVersion";
 import { Button } from "@/components/ui/Button";
 import { Icon, MaskIcon } from "@/components/ui/Icon";
@@ -299,6 +300,7 @@ export function SettingsScreen() {
               />
             </div>
           </div>
+          <PendingRemindersList />
         </section>
 
         {prefs.trackingMode !== "meds" ? (

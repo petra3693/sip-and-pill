@@ -10,7 +10,7 @@ import type {
 
 export const STORAGE_KEY = "sip-and-pill-prefs-v2";
 
-/** App version shown on splash + settings (keep in sync with package.json). */
+/** Web fallback version when Capacitor App.getInfo() is unavailable. */
 export const APP_VERSION = "0.1.0";
 
 /** Maximum daily water intake in milliliters. */

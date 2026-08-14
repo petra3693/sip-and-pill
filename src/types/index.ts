@@ -58,11 +58,21 @@ export interface ReminderTime {
   icon?: "morning" | "noon" | "evening" | "custom";
 }
 
+export interface WaterReminderSlot {
+  hour: number;
+  minute: number;
+}
+
 export interface ReminderSchedule {
   frequency: ReminderFrequency;
   soundEnabled: boolean;
   vibrationEnabled: boolean;
   times: ReminderTime[];
+  /**
+   * Custom water reminder clock times. When omitted, slots are derived from
+   * `frequency`. An empty array means the user removed every water reminder.
+   */
+  waterTimes?: WaterReminderSlot[];
 }
 
 export interface WaterSettings {
