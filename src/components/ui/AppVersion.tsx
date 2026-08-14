@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useT } from "@/hooks/useT";
 import { getAppVersionInfo, type AppVersionInfo } from "@/lib/appVersion";
-import { APP_VERSION } from "@/lib/constants";
+import { APP_BUILD, APP_VERSION } from "@/lib/constants";
 
 export function AppVersion({ className = "" }: { className?: string }) {
   const t = useT();
   const [info, setInfo] = useState<AppVersionInfo>({
     version: APP_VERSION,
-    build: null,
+    build: APP_BUILD,
   });
 
   useEffect(() => {

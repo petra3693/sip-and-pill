@@ -96,6 +96,7 @@ export function SettingsScreen() {
   const [medDraft, setMedDraft] = useState("");
   const [contactOpen, setContactOpen] = useState(false);
   const [infoModal, setInfoModal] = useState<InfoModal>(null);
+  const [resetOpen, setResetOpen] = useState(false);
 
   const maxGlasses = glassesFromGoal(
     prefs.water.dailyGoalMl,
@@ -110,10 +111,12 @@ export function SettingsScreen() {
   };
 
   const handleReset = () => {
-    const confirmed = window.confirm(t("resetConfirm"));
-    if (confirmed) {
-      resetAllData();
-    }
+    setResetOpen(true);
+  };
+
+  const confirmReset = () => {
+    setResetOpen(false);
+    resetAllData();
   };
 
   const handleShareApp = async () => {
@@ -522,6 +525,26 @@ export function SettingsScreen() {
         onClose={() => setContactOpen(false)}
         userName={prefs.name}
       />
+
+      <Modal
+        open={resetOpen}
+        title={t("deleteAllMyData")}
+        onClose={() => setResetOpen(false)}
+        footer={
+          <div className="flex flex-col gap-2">
+            <Button variant="danger" onClick={confirmReset}>
+              {t("deleteAllMyData")}
+            </Button>
+            <Button variant="secondary" onClick={() => setResetOpen(false)}>
+              {t("cancel")}
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-[13px] font-medium leading-5 text-[var(--muted)]">
+          {t("resetConfirm")}
+        </p>
+      </Modal>
 
       <Modal
         open={infoModal !== null}

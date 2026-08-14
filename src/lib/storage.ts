@@ -149,16 +149,31 @@ export async function loadPreferences(): Promise<UserPreferences> {
   }
 }
 
+/** Serialize Capacitor Preferences writes so a late set() cannot undo a wipe. */
+let persistQueue: Promise<void> = Promise.resolve();
+
+function enqueuePersist(work: () => Promise<void>): Promise<void> {
+  persistQueue = persistQueue.then(work, work);
+  return persistQueue;
+}
+
 export function savePreferences(prefs: UserPreferences): void {
   if (typeof window === "undefined") {
     return;
   }
 
   const payload = JSON.stringify(prefs);
-  window.localStorage.setItem(STORAGE_KEY, payload);
-  // Mirror into Capacitor Preferences when available (native persistence).
-  void Preferences.set({ key: STORAGE_KEY, value: payload }).catch(() => {
-    // Web / unavailable — localStorage is enough.
+  try {
+    window.localStorage.setItem(STORAGE_KEY, payload);
+  } catch {
+    // private mode
+  }
+  void enqueuePersist(async () => {
+    try {
+      await Preferences.set({ key: STORAGE_KEY, value: payload });
+    } catch {
+      // Web / unavailable — localStorage is enough.
+    }
   });
 }
 
@@ -167,8 +182,18 @@ export function clearPreferences(): void {
     return;
   }
 
-  window.localStorage.removeItem(STORAGE_KEY);
-  void Preferences.remove({ key: STORAGE_KEY }).catch(() => undefined);
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // private mode
+  }
+  void enqueuePersist(async () => {
+    try {
+      await Preferences.remove({ key: STORAGE_KEY });
+    } catch {
+      // ignore
+    }
+  });
 }
 
 /**
@@ -186,16 +211,18 @@ export async function wipeAllLocalData(): Promise<void> {
     }
   }
 
-  try {
-    await Preferences.clear();
-  } catch {
+  await enqueuePersist(async () => {
     try {
-      await Preferences.remove({ key: STORAGE_KEY });
-      await Preferences.remove({ key: THEME_KEY });
+      await Preferences.clear();
     } catch {
-      // ignore
+      try {
+        await Preferences.remove({ key: STORAGE_KEY });
+        await Preferences.remove({ key: THEME_KEY });
+      } catch {
+        // ignore
+      }
     }
-  }
+  });
 
   await cancelAllLocalNotifications();
 }

@@ -1,10 +1,15 @@
 import { App } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
-import { APP_VERSION } from "@/lib/constants";
+import { APP_BUILD, APP_VERSION } from "@/lib/constants";
 
 export type AppVersionInfo = {
   version: string;
   build: string | null;
+};
+
+const WEB_FALLBACK: AppVersionInfo = {
+  version: APP_VERSION,
+  build: APP_BUILD,
 };
 
 /**
@@ -14,19 +19,19 @@ export type AppVersionInfo = {
  */
 export async function getAppVersionInfo(): Promise<AppVersionInfo> {
   if (typeof window === "undefined") {
-    return { version: APP_VERSION, build: null };
+    return WEB_FALLBACK;
   }
 
   try {
     if (Capacitor.isNativePlatform()) {
       const info = await App.getInfo();
       const version = info.version?.trim() || APP_VERSION;
-      const build = info.build?.trim() || null;
+      const build = info.build?.trim() || APP_BUILD;
       return { version, build };
     }
   } catch {
     // Plugin missing or web unimplemented.
   }
 
-  return { version: APP_VERSION, build: null };
+  return WEB_FALLBACK;
 }

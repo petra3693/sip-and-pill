@@ -10,8 +10,13 @@ import type {
 
 export const STORAGE_KEY = "sip-and-pill-prefs-v2";
 
-/** Web fallback version when Capacitor App.getInfo() is unavailable. */
-export const APP_VERSION = "0.1.0";
+/**
+ * Web fallback when Capacitor App.getInfo() is unavailable.
+ * Native UI reads MARKETING_VERSION / versionName and CURRENT_PROJECT_VERSION /
+ * versionCode from the iOS/Android project instead.
+ */
+export const APP_VERSION = "1.0.0";
+export const APP_BUILD = "2";
 
 /** Maximum daily water intake in milliliters. */
 export const MAX_WATER_ML = 10_000;

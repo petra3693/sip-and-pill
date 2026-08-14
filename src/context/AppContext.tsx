@@ -36,7 +36,6 @@ import {
 import { ONBOARDING_FLOW } from "@/lib/screens";
 import { parseTimeToMinutes } from "@/lib/time";
 import {
-  clearPreferences,
   loadPreferences,
   resetDailyProgress,
   savePreferences,
@@ -767,13 +766,17 @@ export function AppProvider({
   }, [updatePrefs]);
 
   const resetAllData = useCallback(() => {
+    const next = demo ? DEMO_PREFERENCES : DEFAULT_PREFERENCES;
+    const nextScreen: AppScreen = demo ? "home" : "splash";
+    // Reset UI immediately so iOS is not stuck waiting on confirm/storage.
+    setPrefs(next);
+    setScreen(nextScreen);
+    if (!persist || demo) return;
     void (async () => {
-      if (persist && !demo) {
-        await wipeAllLocalData();
-        clearPreferences();
-      }
-      setPrefs(demo ? DEMO_PREFERENCES : DEFAULT_PREFERENCES);
-      setScreen(demo ? "home" : "splash");
+      await wipeAllLocalData();
+      // Re-assert defaults after wipe in case a queued persist wrote them back.
+      setPrefs(next);
+      setScreen(nextScreen);
     })();
   }, [demo, persist]);
 
